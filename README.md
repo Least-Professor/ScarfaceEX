@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="ScarfaceEX_W_3.png" width="800"/>
+</p>
+
 **Recommended Patches**
 
 To ensure the best experience, please install these patches (available on Nexus Mods / Github):
