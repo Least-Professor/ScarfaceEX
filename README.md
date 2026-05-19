@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Least-Professor/ScarfaceEX/main/ScarfaceEX_W2.png" width="777"/>
+  <img src="https://raw.githubusercontent.com/Least-Professor/ScarfaceEX/main/ScarfaceEX_W2.png" width="555"/>
 </p>
 
 **Recommended Patches**
