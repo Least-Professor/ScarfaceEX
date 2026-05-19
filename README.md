@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="ScarfaceEX_W_3.png" width="800"/>
+  <img src="ScarfaceEX_W_3.png"/>
 </p>
 
 **Recommended Patches**
