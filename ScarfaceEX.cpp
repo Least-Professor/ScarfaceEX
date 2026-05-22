@@ -1422,7 +1422,22 @@ void** GetNPCList(int* outCount)
         *outCount = 0;
         return nullptr;
     }
-}
+} 
+
+// Characters' Vehicle Shooting Detector
+int Vehicle_Shooting(CharacterObject* character)
+{
+    __try
+    {
+        int pilotState = *(int*)((uintptr_t)character + 0x2E8 + 0x8);
+        return (pilotState == 1 || pilotState == 5) ? 1 : 0;
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return 0; 
+	}
+} 
 
 // Characters' Vehicle Intention Detector
 int Actual_Vehicle_Intention(CharacterObject* character)
@@ -2006,10 +2021,10 @@ bool IsAnyRawInputActive()
 
 void CheckVehicleAnimation(CharacterObject* player)
 {
-    int vehicleState = *(int*)ADDR_VehicleState, Weapon_State = Get_Weapon_State(player), Reversing = Land_Vehicle_Reverse_Driving(player);
+    int vehicleState = *(int*)ADDR_VehicleState, Reversing = Land_Vehicle_Reverse_Driving(player);
 	unsigned long now = GetTickCount();
 	
-	if (vehicleState <= 0 || vehicleState > 2 || Weapon_State!= 0)
+	if (vehicleState <= 0 || vehicleState > 2)
 	{
 		g_VehicleAnim.Reset();
 		return;
@@ -2320,12 +2335,7 @@ void Health_Recovery_Function(CharacterObject* player)
 
 // Main Character Switching Detection
 void Main_Character_Switching_Function(CharacterObject* player)
-{
-	int actionMap = *(int*)ADDR_VehicleState;
-	
-	if (actionMap != 0)
-		return;
-	
+{	
 	if (MCS_Struct.lastPackage == "")
 	{
 		MCS_Struct.lastPackage = CVM_Get_Main_Character_Package_Wrapper();
@@ -2334,6 +2344,10 @@ void Main_Character_Switching_Function(CharacterObject* player)
 	}
 	
 	std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
+	
+	if (currentPackage == "MCP_ArmyTony")
+		return;
+		
     bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage), Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer"), Last_Valid_Package = (MCS_Struct.lastPackage == "MCP_Assassin" || MCS_Struct.lastPackage == "MCP_Driver" || MCS_Struct.lastPackage == "MCP_Enforcer");
 
     if (Main_Character_Switched)
@@ -2341,10 +2355,11 @@ void Main_Character_Switching_Function(CharacterObject* player)
         MCS_Struct.animationPlayed = false;
 		
         if (Last_Valid_Package && !Valid_Package)
-            MCS_Struct.phoneCallTriggered = false;
+		{
+			MCS_Struct.phoneCallTriggered = false;
+			RunScript("GlobalSoundStop();");
+		}
     }
-
-    unsigned long now = GetTickCount();
 
     if (!MCS_Struct.animationPlayed)
     {
@@ -2354,18 +2369,58 @@ void Main_Character_Switching_Function(CharacterObject* player)
 	
     if (!MCS_Struct.phoneCallTriggered && Valid_Package)
     {
-        if (MCS_Struct.lastIteration > 753)
+        if (MCS_Struct.lastIteration > 67)
             RunScript("'MainCharacter'.RequestCellPhoneAnswer(0);");
 
         if (MCS_Struct.lastIteration > MCS_Struct.currentIteration && MCS_Struct.currentIteration == -1)
         {
-            RunScript("'MainCharacter'.RequestCellPhoneEnd();");
+            RunScript("'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\");");
             MCS_Struct.phoneCallTriggered = true;
         }
     }
 
     MCS_Struct.lastPackage = currentPackage;
     MCS_Struct.lastIteration = MCS_Struct.currentIteration;
+}
+
+// ScarfaceEX Features' Validation Tracker
+bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
+{
+	bool scarfaceEXTriggerValid = false;
+	
+	__try
+	{
+		float currentX = *(float*)((uintptr_t)p + 0x34 + 48), currentY = *(float*)((uintptr_t)p + 0x34 + 52), currentZ = *(float*)((uintptr_t)p + 0x34 + 56);
+		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f)), currentNIS = Is_NIS_Active(), currentGamePaused = Is_Game_Paused_HUD(), currentScreenFXTransition = Get_Screen_Effects_Transition_Blacked_Out(), currentTeleportation = Get_Is_Teleporting(), currentDeathStatus = Main_Character_Death_Status();
+		scarfaceEXTriggerValid = (!currentNIS && !currentGamePaused && !currentScreenFXTransition && !currentTeleportation && !currentDeathStatus && !Main_Menu);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		scarfaceEXTriggerValid = false;
+	}
+	
+	return scarfaceEXTriggerValid;
+}
+
+// Character Switching Phone Calls' & Voice Lines' Validation Tracker
+bool Character_Switching_Trigger_Valid(CharacterObject* p)
+{
+	bool characterSwitchingTriggerValid = false;
+	
+	__try
+	{
+		int currentAnimation = Get_Animation_Request_ID(p);
+		bool currentNormalGameState = Is_Game_In_Normal_Game_State(), currentMission = Get_Mission_Active(), Player_Vehicle_Active = IsInVehicle();
+		characterSwitchingTriggerValid = (currentNormalGameState && !currentMission && !Player_Vehicle_Active && !currentAnimation);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		characterSwitchingTriggerValid = false;
+	}
+	
+	return characterSwitchingTriggerValid;
 }
 
 // Main Input Monitoring Thread
@@ -2383,45 +2438,35 @@ DWORD WINAPI InputThread(LPVOID lpParam)
             continue;
         
         unsigned long now = GetTickCount();
-		float currentX = *(float*)((uintptr_t)p + 0x34 + 48), currentY = *(float*)((uintptr_t)p + 0x34 + 52), currentZ = *(float*)((uintptr_t)p + 0x34 + 56);
-		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f));
+		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
 		
-		if (Main_Menu)
+		if (!Scarface_EX_Trigger_Valid)
 			continue;
 		
-		std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
-		bool currentNIS = Is_NIS_Active(), currentNormalGameState = Is_Game_In_Normal_Game_State(), currentGamePaused = Is_Game_Paused_HUD(), currentScreenFXTransition = Get_Screen_Effects_Transition_Blacked_Out(), currentMission = Get_Mission_Active(), currentTeleportation = Get_Is_Teleporting(), currentDeathStatus = Main_Character_Death_Status(), Combat_Tutorial = (currentPackage == "MCP_ArmyTony");
-		int currentAnimation = Get_Animation_Request_ID(p), Seating_Position = Get_Vehicle_State(p), npcCount = 0;
-		
-		MCS_Struct.currentIteration = GlobalSoundGetCurrentMs();
-		
-		if (!currentNIS && !currentGamePaused && !currentScreenFXTransition && !currentTeleportation && !currentDeathStatus)
-		{
-			if (currentNormalGameState && !currentAnimation)
-			{
-				Health_Recovery_Function(p);
-
-				if (!Combat_Tutorial)
-					Main_Character_Switching_Function(p);
-			}
-			
-			// Main Character Vehicle Idles
-			if (Seating_Position)
-				CheckVehicleAnimation(p);
-			
-			// CharacterObject::GetInstance() Tracker : Vehicle / Weapon Prop Damages \ Non-Playable Characters' Vehicles' Idles
-			void** npcList = GetNPCList(&npcCount);
-			Damages_50_Calibers(npcList, npcCount);
-			CheckNPCVehicleDamage(npcList, npcCount);
-			CheckNPCVehicleAnimations(npcList, npcCount);
-		}
-
-        if (now - g_LastDodgeTime >= g_Config.cooldown) 
+		if (now - g_LastDodgeTime >= g_Config.cooldown) 
         {
             CheckKeyboard(p, now);
             CheckController(p, now);
             CheckDirectInput(p, now);
         }
+		
+		bool Character_Switching = Character_Switching_Trigger_Valid(p);
+		MCS_Struct.currentIteration = GlobalSoundGetCurrentMs();
+		
+		if (Character_Switching)
+			Main_Character_Switching_Function(p);
+		
+		Health_Recovery_Function(p);
+		
+		// CharacterObject::GetInstance() Tracker : Vehicle / Weapon Prop Damages \ Non-Playable / Playable Characters' Vehicles' Idles
+		int npcCount = 0, Shooting = Vehicle_Shooting(p), Seating_Position = Get_Vehicle_State(p), Weapon_State = Get_Weapon_State(p);
+		void** npcList = GetNPCList(&npcCount);
+		Damages_50_Calibers(npcList, npcCount);
+		CheckNPCVehicleDamage(npcList, npcCount);
+		CheckNPCVehicleAnimations(npcList, npcCount);
+		
+		if (Seating_Position && !Shooting && !Weapon_State)
+			CheckVehicleAnimation(p); 		
     } 
 	
 	CleanupDirectInput();
