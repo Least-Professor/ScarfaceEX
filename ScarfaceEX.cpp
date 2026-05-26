@@ -2370,11 +2370,11 @@ void Main_Character_Switching_Function(CharacterObject* player)
     if (!MCS_Struct.phoneCallTriggered && Valid_Package)
     {
         if (MCS_Struct.lastIteration > 67)
-            RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_Hide();");
+            RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_ToggleHUD();");
 
         if (MCS_Struct.lastIteration > MCS_Struct.currentIteration && MCS_Struct.currentIteration == -1)
         {
-            RunScript("'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\"); HUD_Show();");
+            RunScript("'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\"); HUD_ToggleHUD();");
             MCS_Struct.phoneCallTriggered = true;
         }
     }
