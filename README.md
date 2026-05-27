@@ -16,6 +16,8 @@ To ensure the best experience, please install these patches (available on Nexus 
 
 This project was made possible by these contributors to the Scarface: The World Is Yours modding scene:
 
+- **Benjamin Haisch:** [Scarface Archive Explorer](https://www.nexusmods.com/scarfacetheworldisyours/mods/1)
+- **Neoxaero:** [Scarface Extracter](https://www.nexusmods.com/scarfacetheworldisyours/mods/2)
 - **Lucas Cardellini:** [Lucas' Pure3D Editor](https://modbakery.donutteam.com/projects/view/9)
 - **ermaccer:** [ScarfaceHook](https://github.com/ermaccer/ScarfaceHook)
 - **GangstaTeam:** [CSORedirect](https://github.com/GangstaTeam/CSORedirect) | [classes](https://github.com/GangstaTeam/classes) | [hashkey](https://github.com/GangstaTeam/hashkey)
