@@ -28,6 +28,7 @@ struct Main_Character_Switching
 	bool animationPlayed, phoneCallTriggered;
 	std::string lastPackage;
 	int currentIteration, lastIteration;
+	unsigned long lastTimer;
 	
 	void Reset()
 	{
@@ -36,6 +37,7 @@ struct Main_Character_Switching
 		lastPackage = "";
 		currentIteration = 0;
 		lastIteration = 0;
+		lastTimer = 0UL;
 	}
 }
 MCS_Struct;
@@ -2333,56 +2335,6 @@ void Health_Recovery_Function(CharacterObject* player)
 	HRS_Struct.lastHealth = currentHealth;
 } 
 
-// Main Character Switching Detection
-void Main_Character_Switching_Function(CharacterObject* player)
-{	
-	if (MCS_Struct.lastPackage == "")
-	{
-		MCS_Struct.lastPackage = CVM_Get_Main_Character_Package_Wrapper();
-		
-		return;
-	}
-	
-	std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
-	
-	if (currentPackage == "MCP_ArmyTony")
-		return;
-		
-    bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage), Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer"), Last_Valid_Package = (MCS_Struct.lastPackage == "MCP_Assassin" || MCS_Struct.lastPackage == "MCP_Driver" || MCS_Struct.lastPackage == "MCP_Enforcer");
-
-    if (Main_Character_Switched)
-    {
-        MCS_Struct.animationPlayed = false;
-		
-        if (Last_Valid_Package && !Valid_Package)
-		{
-			MCS_Struct.phoneCallTriggered = false;
-			RunScript("GlobalSoundStop();");
-		}
-    }
-
-    if (!MCS_Struct.animationPlayed)
-    {
-        PlayAnimation(player, g_Config.SwitchingCharacters, 0);
-        MCS_Struct.animationPlayed = true;
-    }
-	
-    if (!MCS_Struct.phoneCallTriggered && Valid_Package)
-    {
-        if (MCS_Struct.lastIteration > 67)
-            RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_ToggleHUD();");
-
-        if (MCS_Struct.lastIteration > MCS_Struct.currentIteration && MCS_Struct.currentIteration == -1)
-        {
-            RunScript("'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\"); HUD_ToggleHUD();");
-            MCS_Struct.phoneCallTriggered = true;
-        }
-    }
-
-    MCS_Struct.lastPackage = currentPackage;
-    MCS_Struct.lastIteration = MCS_Struct.currentIteration;
-}
-
 // ScarfaceEX Features' Validation Tracker
 bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 {
@@ -2421,6 +2373,62 @@ bool Character_Switching_Trigger_Valid(CharacterObject* p)
 	}
 	
 	return characterSwitchingTriggerValid;
+}
+
+// Main Character Switching Detection
+void Main_Character_Switching_Function(CharacterObject* player)
+{	
+	if (MCS_Struct.lastPackage == "")
+	{
+		MCS_Struct.lastPackage = CVM_Get_Main_Character_Package_Wrapper();
+		
+		return;
+	}
+	
+	std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
+	
+	if (currentPackage == "MCP_ArmyTony")
+		return;
+		
+    bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage), Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer"), Last_Valid_Package = (MCS_Struct.lastPackage == "MCP_Assassin" || MCS_Struct.lastPackage == "MCP_Driver" || MCS_Struct.lastPackage == "MCP_Enforcer");
+
+    if (Main_Character_Switched)
+    {
+        if (Last_Valid_Package && !Valid_Package)
+			MCS_Struct.phoneCallTriggered = false;
+		
+		if (Valid_Package)
+			MCS_Struct.lastTimer = GetTickCount();
+		
+		MCS_Struct.animationPlayed = false;
+    }
+	
+	unsigned long currentTimer = GetTickCount();
+	bool Timer = (((currentTimer - MCS_Struct.lastTimer) >= 1357) && (MCS_Struct.currentIteration != -1)), Timelapse = ((currentTimer - MCS_Struct.lastTimer) >= 1357), Time = (!Timer && Timelapse);
+
+    if (!MCS_Struct.animationPlayed)
+    {
+        PlayAnimation(player, g_Config.SwitchingCharacters, 0);
+        MCS_Struct.animationPlayed = true;
+    }
+	
+    if (!MCS_Struct.phoneCallTriggered && Valid_Package)
+    {		
+		if (Timer)
+			RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_Hide();");
+
+        if ((MCS_Struct.lastIteration > MCS_Struct.currentIteration) && (MCS_Struct.currentIteration == -1))
+        {
+            RunScript("GlobalSoundStop(); 'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\"); HUD_Show();");
+            MCS_Struct.phoneCallTriggered = true;
+        }
+		
+		if (Time)
+			MCS_Struct.phoneCallTriggered = true;
+    } 
+
+    MCS_Struct.lastPackage = currentPackage;
+    MCS_Struct.lastIteration = MCS_Struct.currentIteration;
 }
 
 // Main Input Monitoring Thread
