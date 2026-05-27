@@ -2080,7 +2080,7 @@ void CheckVehicleAnimation(CharacterObject* player)
 			if (entryDelayMet && releaseDelayMet)
 			{
 				const std::string& anim = (vehicleState == 1) ? g_Config.landVehicleIdles : g_Config.waterVehicleIdles;
-				PlayAnimation(player, anim, 90);
+				PlayAnimation(player, anim, 0);
 				g_VehicleAnim.idle = true;
 				g_VehicleAnim.active = false;
 			}			
@@ -2159,7 +2159,7 @@ void CheckNPCVehicleAnimations(void** pData, int count)
                 if (!state.idlePlayed)
                 {
                     const std::string& anim = isBoat ? g_Config.waterVehicleIdles : g_Config.landVehicleIdles;
-                    PlayAnimation(npc, anim, 90);
+                    PlayAnimation(npc, anim, 0);
                     state.idlePlayed = true;
                     state.activePlayed = false;
                 }
