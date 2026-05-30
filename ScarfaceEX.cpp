@@ -27,7 +27,7 @@ struct Main_Character_Switching
 {
 	bool animationPlayed, phoneCallTriggered;
 	std::string lastPackage;
-	int currentIteration, lastIteration;
+	int currentIteration, lastIteration, packageIteration;
 	unsigned long lastTimer;
 	
 	void Reset()
@@ -37,6 +37,7 @@ struct Main_Character_Switching
 		lastPackage = "";
 		currentIteration = 0;
 		lastIteration = 0;
+		packageIteration = 0;
 		lastTimer = 0UL;
 	}
 }
@@ -126,7 +127,7 @@ struct Config
     int diFrontButton, diLeftButton, diRightButton, diBackButton, diLeftPeekShootButton, diRightPeekShootButton; 			   
 	
 	// Animation Names
-    std::string frontAnimation, leftAnimation, rightAnimation, backAnimation, leftPeekShootAnimation, rightPeekShootAnimation, waterVehicleDriver, landVehicleDriver, landVehicleDriverReverse, waterVehicleIdles, landVehicleIdles, landVehicleDamageDriver, landVehicleDamageDriverReverse, waterVehicleDamageDriver, landVehicleDamagePassenger, waterVehicleDamagePassenger, Damage_50_Calibers, HealthRecovery, SwitchingCharacters;
+    std::string frontAnimation, leftAnimation, rightAnimation, backAnimation, leftPeekShootAnimation, rightPeekShootAnimation, waterVehicleDriver, waterVehiclePassenger, landVehicleDriver, landVehicleDriverReverse, waterVehicleIdles, landVehicleIdles, landVehicleDamageDriver, landVehicleDamageDriverReverse, waterVehicleDamageDriver, landVehicleDamagePassenger, waterVehicleDamagePassenger, Damage_50_Calibers, HealthRecovery, SwitchingCharacters;
     
 	// Press Mode
 	int pressMode;
@@ -801,12 +802,13 @@ void LoadConfig()
 	g_Config.SwitchingCharacters = "Switching_Characters";
 	
 	// Vehicles
-	g_Config.waterVehicleDriver = "Boat_Steer_Generic";
+	g_Config.waterVehicleDriver = "Reset_Boat_Steer_Generic";
+	g_Config.waterVehiclePassenger = "Reset_Pass_Sit";
 	g_Config.waterVehicleIdles = "Water_Vehicles_Idles";            
 	g_Config.waterVehicleDamageDriver = "Driver_Water_Vehicle_Damage";
 	g_Config.waterVehicleDamagePassenger = "Passenger_Water_Vehicle_Damage";
-	g_Config.landVehicleDriver = "Steer_Forward";
-	g_Config.landVehicleDriverReverse = "Steer_Reverse";
+	g_Config.landVehicleDriver = "Reset_Steer_Forward";
+	g_Config.landVehicleDriverReverse = "Reset_Steer_Reverse";
 	g_Config.landVehicleIdles = "Land_Vehicles_Idles";   
 	g_Config.landVehicleDamageDriver = "Driver_Land_Vehicle_Damage";
 	g_Config.landVehicleDamageDriverReverse = "Driver_Land_Vehicle_Damage_Reverse";
@@ -851,7 +853,7 @@ void LoadConfig()
 		outFile << "[Direct_Input_Controller]\n\nFront_Button=0\nLeft_Button=1\nRight_Button=2\nBack_Button=3\nLeft_Peek_Shoot_Button=4\nRight_Peek_Shoot_Button=5\n\n";
 		outFile << "[Animations]\n\nSwitching_Characters=Switching_Characters\nFront_Animation=GEN_Action_Evade_Dive_N\nLeft_Animation=Left_Dive_Dodge_Roll_West\nRight_Animation=Right_Dive_Dodge_Roll_East\nBack_Animation=Proximity_Weapon_Attack\nLeft_Peek_Shoot_Animation=Left_Peek_Shoot\nRight_Peek_Shoot_Animation=Right_Peek_Shoot\nHealth_Recovery=Health_Recovery\n\n";
 		outFile << "[Behavior]\n\nPress_Mode=2\nPress_Window=210\nCooldown=753\n\n";
-		outFile << "[Vehicles]\n\nWater_Vehicle_Driver=Boat_Steer_Generic\nLand_Vehicle_Driver=Steer_Forward\nLand_Vehicle_Driver_Reverse=Steer_Reverse\nWater_Vehicle_Idles=Water_Vehicles_Idles\nLand_Vehicle_Idles=Land_Vehicles_Idles\nDriver_Land_Vehicle_Damage=Driver_Land_Vehicle_Damage\nDriver_Land_Vehicle_Damage_Reverse=Driver_Land_Vehicle_Damage_Reverse\nDriver_Water_Vehicle_Damage=Driver_Water_Vehicle_Damage\nPassenger_Land_Vehicle_Damage=Passenger_Land_Vehicle_Damage\nPassenger_Water_Vehicle_Damage=Passenger_Water_Vehicle_Damage\nDamage_50_Calibers=Damage_50_Calibers\n\n";
+		outFile << "[Vehicles]\n\nWater_Vehicle_Passenger=Reset_Pass_Sit\nWater_Vehicle_Driver=Reset_Boat_Steer_Generic\nLand_Vehicle_Driver=Reset_Steer_Forward\nLand_Vehicle_Driver_Reverse=Reset_Steer_Reverse\nWater_Vehicle_Idles=Water_Vehicles_Idles\nLand_Vehicle_Idles=Land_Vehicles_Idles\nDriver_Land_Vehicle_Damage=Driver_Land_Vehicle_Damage\nDriver_Land_Vehicle_Damage_Reverse=Driver_Land_Vehicle_Damage_Reverse\nDriver_Water_Vehicle_Damage=Driver_Water_Vehicle_Damage\nPassenger_Land_Vehicle_Damage=Passenger_Land_Vehicle_Damage\nPassenger_Water_Vehicle_Damage=Passenger_Water_Vehicle_Damage\nDamage_50_Calibers=Damage_50_Calibers\n\n";
 		outFile << "[First_Person_Camera]\n\nEnabled=0\nFoot_Only=0\nBone_Position=13\nHeight_Adjust=0.0\nSide_Adjust=0.0\nDistance_Adjust=0.0\n";
         outFile.close();
         return;
@@ -1005,6 +1007,9 @@ void LoadConfig()
 		
 		if (section == "Vehicles")
 		{
+			if (key == "Water_Vehicle_Passenger" && !value.empty()) 
+				g_Config.waterVehiclePassenger = value;
+			
 			if (key == "Water_Vehicle_Driver" && !value.empty()) 
 				g_Config.waterVehicleDriver = value;
 			
@@ -1347,7 +1352,35 @@ int Damage_Weapon(CharacterObject* character)
 	{ 
 		return 0; 
 	}
-}
+} 
+
+// Animation Priority ID
+int Get_Animation_Priority_ID(CharacterObject* character)
+{
+    if (!character)
+        return -1;
+
+    int result = -1;
+
+    __try
+    {
+        __asm
+        {
+            push character
+            mov eax, 0x005874B0
+            call eax
+            add esp, 4
+            mov result, eax
+        }
+    }
+
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return -1;
+    }
+
+    return result;
+} 
 
 // Animation Request ID
 int Get_Animation_Request_ID(CharacterObject* character)
@@ -1426,6 +1459,21 @@ void** GetNPCList(int* outCount)
     }
 } 
 
+// Characters' Vehicle Animation Type Detector
+int Vehicle_Animation(CharacterObject* character)
+{
+    __try
+    {
+        int pilotState = *(int*)((uintptr_t)character + 0x2E8 + 0xC);
+        return pilotState;
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return 0; 
+	}
+} 
+
 // Characters' Vehicle Shooting Detector
 int Vehicle_Shooting(CharacterObject* character)
 {
@@ -1448,6 +1496,21 @@ int Actual_Vehicle_Intention(CharacterObject* character)
     {
         int pilotState = *(int*)((uintptr_t)character + 0x2E8);
         return (pilotState > 2 && pilotState < 6) ? 1 : 0;
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return 0; 
+	}
+} 
+
+// Characters' Passenger Vehicle State Detector
+int Get_Vehicle_Passenger_State(CharacterObject* npc)
+{
+    __try
+    {
+        int pilotState = *(int*)((uintptr_t)npc + 0x2E8);
+        return (pilotState == 4) ? 1 : 0;
     }
     
 	__except(EXCEPTION_EXECUTE_HANDLER) 
@@ -1596,9 +1659,11 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
 // 'CharacterObject :: RequestAnimation()' Triggers Under Appropriate Conditions
 void Dodge(CharacterObject* player, const std::string& animName) 
 {
-    if (IsInVehicle()) 
+    bool ActionMap = IsInVehicle();
+	
+	if (ActionMap)
 		return;
-    
+	
 	PlayAnimation(player, animName, 0);
 }
 
@@ -2115,9 +2180,9 @@ void CheckNPCVehicleAnimations(void** pData, int count)
         if (!isBoat && !isCar)
             continue;
 
-        int seatingPosition = Get_Vehicle_State(npc), Weapon_State = Get_Weapon_State(npc), Reversing = Land_Vehicle_Reverse_Driving(npc);
+        int seatingPosition = Get_Vehicle_State(npc), Weapon_State = Get_Weapon_State(npc), Reversing = Land_Vehicle_Reverse_Driving(npc), Shooting = Vehicle_Shooting(npc);
 
-        if (seatingPosition != 1 || Weapon_State != 0)
+        if (seatingPosition != 1 || Weapon_State || Shooting)
         {
             g_NPCStates[i].Reset();
             continue;
@@ -2296,6 +2361,65 @@ void Damages_50_Calibers(void** pData, int count)
     }
 }
 
+void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
+{
+	if (!pData || count <= 0)
+        return;
+	
+	for (int i = 0; i < count; i++)
+	{
+		CharacterObject* character = (CharacterObject*)pData[i];
+
+        if (!character)
+            continue;
+		
+		bool Inside_Water_Vehicle = NPC_IsInBoat(character), Inside_Land_Vehicle = NPC_IsInCar(character), Inside_Vehicle = (Inside_Water_Vehicle || Inside_Land_Vehicle);
+		
+		if (!Inside_Vehicle)
+			continue;
+		
+		int animationRequestID = Get_Animation_Request_ID(character);
+		
+		if (animationRequestID)
+			continue;
+		
+		bool reset = (!animationRequestID), landVehicleDriverReversing = Land_Vehicle_Reverse_Driving(character), driver = Get_Vehicle_State(character), passenger = Get_Vehicle_Passenger_State(character);
+		
+		if (reset)
+		{
+			if (driver)
+			{
+				if (Inside_Land_Vehicle)
+				{
+					const std::string& anim = landVehicleDriverReversing ? g_Config.landVehicleDriverReverse : g_Config.landVehicleDriver;
+					PlayAnimation(character, anim, 0);
+				}
+				
+				if (Inside_Water_Vehicle)
+				{
+					const std::string& anim = g_Config.waterVehicleDriver;
+					PlayAnimation(character, anim, 0);
+				}
+			}
+			
+			if (passenger)
+			{
+				if (Inside_Land_Vehicle)
+				{
+					const std::string& anim = g_Config.landVehicleIdles;
+					PlayAnimation(character, anim, 0);
+				}
+				
+				if (Inside_Water_Vehicle)
+				{
+					const std::string& anim = g_Config.waterVehiclePassenger;
+					PlayAnimation(character, anim, 0);
+				}
+			}
+		}
+	}
+}
+
 // Health Recovery Animation
 void Health_Recovery_Function(CharacterObject* player)
 {
@@ -2395,7 +2519,10 @@ void Main_Character_Switching_Function(CharacterObject* player)
     if (Main_Character_Switched)
     {
         if (Last_Valid_Package && !Valid_Package)
+		{
 			MCS_Struct.phoneCallTriggered = false;
+			MCS_Struct.packageIteration = 0;
+		}
 		
 		if (Valid_Package)
 			MCS_Struct.lastTimer = GetTickCount();
@@ -2414,8 +2541,11 @@ void Main_Character_Switching_Function(CharacterObject* player)
 	
     if (!MCS_Struct.phoneCallTriggered && Valid_Package)
     {		
-		if (Timer)
+		if (Timer && !MCS_Struct.packageIteration)
+		{
 			RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_Hide();");
+			MCS_Struct.packageIteration = 1;
+		}
 
         if ((MCS_Struct.lastIteration > MCS_Struct.currentIteration) && (MCS_Struct.currentIteration == -1))
         {
@@ -2444,6 +2574,10 @@ DWORD WINAPI InputThread(LPVOID lpParam)
         
         if (!p) 
             continue;
+		
+		std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+		debugFile << "Player\n\n\tShooting_State : " << Vehicle_Shooting(p) << "\n\tWeapon_State : " << Get_Weapon_State(p) << "\n";
+		debugFile.close();
         
         unsigned long now = GetTickCount();
 		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
@@ -2472,6 +2606,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 		Damages_50_Calibers(npcList, npcCount);
 		CheckNPCVehicleDamage(npcList, npcCount);
 		CheckNPCVehicleAnimations(npcList, npcCount);
+		Vehicle_Character_Animation_Reset_Fix(npcList, npcCount);
 		
 		if (Seating_Position && !Shooting && !Weapon_State)
 			CheckVehicleAnimation(p); 		
