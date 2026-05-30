@@ -2575,9 +2575,9 @@ DWORD WINAPI InputThread(LPVOID lpParam)
         if (!p) 
             continue;
 		
-		std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
-		debugFile << "Player\n\n\tShooting_State : " << Vehicle_Shooting(p) << "\n\tWeapon_State : " << Get_Weapon_State(p) << "\n";
-		debugFile.close();
+		/**std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+		debugFile << "Player\n\n\tShooting_State : " << Vehicle_Shooting(p) << "\n\tWeapon_State : " << Get_Weapon_State(p) << "\n\n";
+		debugFile.close();**/
         
         unsigned long now = GetTickCount();
 		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
