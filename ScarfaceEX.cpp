@@ -282,8 +282,7 @@ struct Config
 				landVehicleDamagePassenger, 
 				waterVehicleDamagePassenger, 
 				Damage_50_Calibers, 
-				HealthRecovery, 
-				SwitchingCharacters;
+				HealthRecovery;
     
 	// Press Mode
 	int pressMode;
