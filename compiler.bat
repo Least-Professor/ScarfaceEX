@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 echo ========================
-echo ScarfaceEX : Compiler
+echo ScarfaceEX: Compiler
 echo ========================
 echo.
 
@@ -30,48 +30,56 @@ echo [3/4] Configuring project with CMake...
 echo.
 
 REM Try Visual Studio first
-cmake .. -G "Visual Studio 17 2022" -A Win32
+cmake .. -G "Visual Studio 18 2026" -A Win32
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo Visual Studio 2022 not found, trying 2019...
+    echo Visual Studio 2026 not found, trying 2022...
     echo.
     
-    cmake .. -G "Visual Studio 16 2019" -A Win32
+    cmake .. -G "Visual Studio 17 2022" -A Win32
     
     if %ERRORLEVEL% NEQ 0 (
         echo.
-        echo Visual Studio 2019 not found, trying 2017...
+        echo Visual Studio 2022 not found, trying 2019...
         echo.
         
-        cmake .. -G "Visual Studio 15 2017" -A Win32
+        cmake .. -G "Visual Studio 16 2019" -A Win32
         
         if %ERRORLEVEL% NEQ 0 (
             echo.
-            echo All Visual Studio versions failed.
-            echo Trying MinGW Makefiles with custom XInput...
-            echo.
-            
-            REM For MinGW, use custom XInput header
-            cmake .. -G "MinGW Makefiles" ^
-                -DCMAKE_C_FLAGS="-m32" ^
-                -DCMAKE_CXX_FLAGS="-m32 -I../include" ^
-                -DCMAKE_BUILD_TYPE=Release
-            
-            if %ERRORLEVEL% NEQ 0 (
-                echo.
-                echo ========================================
-                echo ERROR: CMake configuration failed!
-                echo ========================================
-                echo.
-                echo Please ensure you have either:
-                echo   - Visual Studio 2017 or newer, OR
-                echo   - MinGW-w64 with make
-                echo.
-                cd ..
-                pause
-                exit /b 1
-            )
+			echo Visual Studio 2019 not found, trying 2017...
+			echo.
+			
+			cmake .. -G "Visual Studio 15 2017" -A Win32
+			
+			if %ERRORLEVEL% NEQ 0 (
+				echo.
+				echo All Visual Studio versions failed.
+				echo Trying MinGW Makefiles with custom XInput...
+				echo.
+				
+				REM For MinGW, use custom XInput header
+				cmake .. -G "MinGW Makefiles" ^
+					-DCMAKE_C_FLAGS="-m32" ^
+					-DCMAKE_CXX_FLAGS="-m32 -I../include" ^
+					-DCMAKE_BUILD_TYPE=Release
+				
+				if %ERRORLEVEL% NEQ 0 (
+					echo.
+					echo ========================================
+					echo ERROR: CMake configuration failed!
+					echo ========================================
+					echo.
+					echo Please ensure you have either:
+					echo   - Visual Studio 2017 or newer, OR
+					echo   - MinGW-w64 with make
+					echo.
+					cd ..
+					pause
+					exit /b 1
+				)
+			)
         )
     )
 )
