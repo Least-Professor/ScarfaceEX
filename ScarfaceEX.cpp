@@ -6,39 +6,151 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <random>
+#include <chrono>
 
 #pragma comment(lib, "Psapi.lib")
 #pragma comment(lib, "Xinput.lib")
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
-typedef void* CharacterObject;
-typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
-typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
-typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
-typedef int (__cdecl *Global_Sound_Get_Current_Function)();
-
 #define ADDR_VehicleState 0x007BC51C
 #define CONFIG_FILE "ScarfaceEX_Configuration.ini"
 #define README_FILE "ScarfaceEX_Instructions.txt"
+// std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+
+typedef void* CharacterObject;
+typedef int (__cdecl *Global_Sound_Get_Current_Function)();
+typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
+typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
+typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
+
+// Random Values' Start-Up Seed Generation
+std::mt19937& Get_Random_Seed() 
+{
+    thread_local std::mt19937 randomSeed([]() 
+	{
+        unsigned long currentSeed = static_cast<unsigned long>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        
+		return std::mt19937(currentSeed);
+    }());
+    
+	return randomSeed;
+}
+
+// Random Values Generation
+unsigned long Random_Quote_Delays()
+{
+	unsigned long randomQuoteDelays = std::uniform_int_distribution<unsigned long>(1000UL, 10000UL)(Get_Random_Seed());
+	
+	return randomQuoteDelays;
+}
+
+unsigned long Random_Quotes()
+{
+	unsigned long randomQuotes = std::uniform_int_distribution<unsigned long>(0UL, 5UL)(Get_Random_Seed());
+	
+	return randomQuotes;
+}
+
+unsigned long Miami_Narrator_Quotes()
+{
+	unsigned long miamiNarratorQuotes = std::uniform_int_distribution<unsigned long>(0UL, 7UL)(Get_Random_Seed());
+	
+	return miamiNarratorQuotes;
+}
+
+unsigned long Islands_Narrator_Quotes()
+{
+	unsigned long islandsNarratorQuotes = std::uniform_int_distribution<unsigned long>(0UL, 5UL)(Get_Random_Seed());
+	
+	return islandsNarratorQuotes;
+}
+
+// Narrator Death Quotes Tracking Structure
+struct Narrator_Death_Quotes_Structure
+{
+	unsigned long lastTimer;
+	bool lastDeathStatus,
+		 lastGlobalSoundMS,
+		 lastVocalMS,
+		 narratorDeathQuotesTriggerValid;
+		 
+	void Reset()
+	{
+		lastTimer = 0UL;
+		lastDeathStatus = false;
+		lastGlobalSoundMS = false;
+		lastVocalMS = false;
+		narratorDeathQuotesTriggerValid = false;
+	}
+}
+NDQS_Struct;
+
+// Unused Cutscenes
+struct Unused_Cutscenes_Structure
+{
+	bool MNIS_S01_4_Cops_Are_Here;
+	
+	void Reset()
+	{
+		MNIS_S01_4_Cops_Are_Here = false;
+	}
+}
+UCS_Struct;
+
+// Combat Tutorial Missing Narrator Voices Tracker
+struct Combat_Tutorial_Missing_Narrator_Voices_Tracker_Structure
+{
+	int lastDrawnWeapon;
+	unsigned long lastTimer, 
+				  quoteDelay,
+				  nextQuote;
+	
+	bool weaponPickedUp,
+		 weaponChanged,
+		 lastRageMode, 
+		 missionComplete, 
+		 missionStarted, 
+		 targetsPresent, 
+		 introductionDone;
+	
+	void Reset()
+	{
+		lastDrawnWeapon = 0;
+		quoteDelay = Random_Quote_Delays();
+		nextQuote = Random_Quotes();
+		lastTimer = 0UL;
+		weaponPickedUp = false;
+		weaponChanged = false;
+		lastRageMode = false;
+		missionComplete = false;
+		missionStarted = false;
+		targetsPresent = false;
+		introductionDone = false;
+	}
+}
+CTMNVS_Struct;
 
 // Character Switching Tracker
 struct Main_Character_Switching
 {
-	bool animationPlayed, phoneCallTriggered;
 	std::string lastPackage;
-	int currentIteration, lastIteration, packageIteration;
-	unsigned long lastTimer;
+	bool lastGlobalSoundMS,
+		 narratorQuotesTriggered;
+	
+	unsigned long miamiNarratorQuotes,
+				  islandsNarratorQuotes,
+				  lastTimer;
 	
 	void Reset()
 	{
-		animationPlayed = false;
-		phoneCallTriggered = false;
+		lastGlobalSoundMS = false;
+		narratorQuotesTriggered = false;
 		lastPackage = "";
-		currentIteration = 0;
-		lastIteration = 0;
-		packageIteration = 0;
-		lastTimer = 0UL;
+		miamiNarratorQuotes = Miami_Narrator_Quotes();
+		islandsNarratorQuotes = Islands_Narrator_Quotes();
+		lastTimer = GetTickCount();
 	}
 }
 MCS_Struct;
@@ -48,7 +160,9 @@ struct Health_Recovery_Structure
 {
 	int lastHealth;
 	bool animationPlayed;
-	float lastX, lastY, lastZ;
+	float lastX, 
+		  lastY, 
+		  lastZ;
 	
 	void Reset()
 	{
@@ -64,7 +178,9 @@ HRS_Struct;
 // 1st Person Camera Mode
 struct Vector 
 {
-    float X, Y, Z;
+    float X, 
+		  Y, 
+		  Z;
     
 	Vector() : X(0), Y(0), Z(0) 
 	{
@@ -108,9 +224,15 @@ struct Matrix
 // 1st Person Camera Configuration
 struct FPSCameraConfig 
 {
-    bool enabled, footOnly;
+    bool enabled, 
+		 footOnly;
+	
 	int bonePosition;
-    float heightAdjust, sideAdjust, distanceAdjust; // Y-Offset \ X-Offset \ Z-Offset respectively
+	
+	// Y-Offset \ X-Offset \ Z-Offset respectively
+    float heightAdjust, 
+		  sideAdjust, 
+		  distanceAdjust; 
 } 
 g_FPSConfig;
 
@@ -118,30 +240,70 @@ g_FPSConfig;
 struct Config 
 {
     // Keyboard & Mouse Bindings
-	int frontKey, leftKey, rightKey, backKey, leftPeekShootKey, rightPeekShootKey; 								 			   
+	int frontKey, 
+		leftKey, 
+		rightKey, 
+		backKey, 
+		leftPeekShootKey, 
+		rightPeekShootKey; 								 			   
     
 	// Microsoft Xinput Controller Bindings
-	WORD frontButton, leftButton, rightButton, backButton, leftPeekShootButton, rightPeekShootButton;
+	WORD frontButton, 
+		 leftButton, 
+		 rightButton, 
+		 backButton, 
+		 leftPeekShootButton, 
+		 rightPeekShootButton;
 
 	// Direct-Input Controller Bindings
-    int diFrontButton, diLeftButton, diRightButton, diBackButton, diLeftPeekShootButton, diRightPeekShootButton; 			   
+    int diFrontButton, 
+		diLeftButton, 
+		diRightButton, 
+		diBackButton, 
+		diLeftPeekShootButton, 
+		diRightPeekShootButton; 			   
 	
 	// Animation Names
-    std::string frontAnimation, leftAnimation, rightAnimation, backAnimation, leftPeekShootAnimation, rightPeekShootAnimation, waterVehicleDriver, waterVehiclePassenger, landVehicleDriver, landVehicleDriverReverse, waterVehicleIdles, landVehicleIdles, landVehicleDamageDriver, landVehicleDamageDriverReverse, waterVehicleDamageDriver, landVehicleDamagePassenger, waterVehicleDamagePassenger, Damage_50_Calibers, HealthRecovery, SwitchingCharacters;
+    std::string frontAnimation, 
+				leftAnimation, 
+				rightAnimation, 
+				backAnimation, 
+				leftPeekShootAnimation, 
+				rightPeekShootAnimation, 
+				waterVehicleDriver, 
+				waterVehiclePassenger, 
+				landVehicleDriver, 
+				landVehicleDriverReverse, 
+				waterVehicleIdles, 
+				landVehicleIdles, 
+				landVehicleDamageDriver, 
+				landVehicleDamageDriverReverse, 
+				waterVehicleDamageDriver, 
+				landVehicleDamagePassenger, 
+				waterVehicleDamagePassenger, 
+				Damage_50_Calibers, 
+				HealthRecovery, 
+				SwitchingCharacters;
     
 	// Press Mode
 	int pressMode;
 
 	// Multi-Press Timing Window \ Cooldown Between Dodges [Milliseconds]
-    unsigned long pressWindow, cooldown;																					   
+    unsigned long pressWindow, 
+				  cooldown;																					   
 } 
 g_Config;
 
 // Vehicle Animation State Tracking
 struct VehicleAnimState
 {
-    bool idle, active, wasInVehicle, wasInputActive;
-	unsigned long entryTime, inputReleasedAt;
+    bool idle, 
+		 active, 
+		 wasInVehicle, 
+		 wasInputActive;
+	
+	unsigned long entryTime, 
+				  inputReleasedAt;
 	
     void Reset()
     {
@@ -165,8 +327,10 @@ uintptr_t FindPattern(const char* pattern, const char* mask)
 {
     MODULEINFO modInfo;
     GetModuleInformation(GetCurrentProcess(), GetModuleHandle(NULL), &modInfo, sizeof(MODULEINFO));
-    uintptr_t base = (uintptr_t)modInfo.lpBaseOfDll;
-    size_t size = modInfo.SizeOfImage, patternLen = strlen(mask);
+    
+	uintptr_t base = (uintptr_t)modInfo.lpBaseOfDll;
+    size_t size = modInfo.SizeOfImage, 
+		   patternLen = strlen(mask);
     
     for (size_t i = 0; i < size - patternLen; i++) 
 	{
@@ -209,10 +373,13 @@ unsigned int Hash(char* input)
     
 	do 
 	{
-        int v5 = (65599 * v4) & 0x7FFFFFFF, temp = curChar;
-        if (curChar < 'a') 
+        int v5 = (65599 * v4) & 0x7FFFFFFF, 
+			temp = curChar;
+        
+		if (curChar < 'a') 
 			temp = curChar + ' ';
-        v4 = temp ^ v5;
+        
+		v4 = temp ^ v5;
         curChar = *(++input);
     } 
 	while (*input);
@@ -287,8 +454,11 @@ DamageAnimState g_NPC50CalStates[MAX_NPC_50CAL];
 
 struct NPCAnimState
 {
-    float lastX, lastZ;
-    bool idlePlayed, activePlayed;
+    float lastX, 
+		  lastZ;
+    
+	bool idlePlayed, 
+		 activePlayed;
 
     void Reset()
     {
@@ -334,24 +504,31 @@ struct PressTracker
 // Separate Bindings' Trackers
 struct DirectionalTrackers 
 {
-    PressTracker front, left, right, back, leftPeekShoot, rightPeekShoot;
+    PressTracker front, 
+				 left, 
+				 right, 
+				 back, 
+				 leftPeekShoot, 
+				 rightPeekShoot;
 } 
 g_Trackers;
 
 // Global Variables
 unsigned long g_LastDodgeTime = 0;
-uintptr_t g_PlayerPointerAddress = 0, g_CVManagerAddress = 0;
+uintptr_t g_PlayerPointerAddress = 0, 
+		  g_CVManagerAddress = 0;
+
 PlayAnimationFunc g_PlayAnimationFunc = NULL;
 CVM_Get_Main_Character_Package_Function CVM_Get_Main_Character_Package_Pointer = (CVM_Get_Main_Character_Package_Function)0x004f4d60;
 Run_Script_Function Run_Script_Pointer = NULL;
 uintptr_t Run_Script_Address = 0;
 Global_Sound_Get_Current_Function Global_Sound_Get_Current_Pointer = (Global_Sound_Get_Current_Function)0x0049a420;
 
-// Neonix Remastered Project 1.1 Tracker
-static int NRMA_Cached = -1;
-
 // Keyboard \ Mouse \ Microsoft Xinput Controller \ Direct-Input Controller States Tracker; Direct-Input Flag
-bool g_KeyboardState[6] = { false, false, false, false, false, false }, g_ControllerState[6] = { false, false, false, false, false, false }, g_DirectInputState[6] = { false, false, false, false, false, false }, g_DirectInputEnabled = false;
+bool g_KeyboardState[6] = { false, false, false, false, false, false },
+	 g_ControllerState[6] = { false, false, false, false, false, false },
+	 g_DirectInputState[6] = { false, false, false, false, false, false }, 
+	 g_DirectInputEnabled = false;
 
 // DirectInput Globals
 LPDIRECTINPUT8 g_pDI = NULL;
@@ -364,7 +541,6 @@ HANDLE g_InputThreadHandle = NULL;
 // First Person Camera Globals
 typedef void (__thiscall *SetPositionFunc)(void* camera, Vector* pos);
 typedef Vector* (__thiscall *GetBonePositionFunc)(CharacterObject* character, int boneId);
-
 SetPositionFunc g_OriginalSetPosition = NULL;
 GetBonePositionFunc g_GetBonePosition = NULL;
 
@@ -398,7 +574,7 @@ bool Initialise_Run_Script()
     Run_Script_Address = addr;
     uintptr_t Function_Address = 0;
     ReadCall(Run_Script_Address, &Function_Address);
-    Run_Script_Pointer = (Run_Script_Function)Function_Address;
+	Run_Script_Pointer = (Run_Script_Function)Function_Address;
 
     return (Run_Script_Pointer != NULL);
 } 
@@ -407,7 +583,7 @@ bool Initialise_Run_Script()
 void RunScript(const char* script)
 {
     if (!script || !Run_Script_Pointer)
-        return;
+			return;
 
     __try
     {
@@ -423,7 +599,7 @@ void RunScript(const char* script)
 const char* CVM_Get_Main_Character_Package_Wrapper()
 {
     if (!CVM_Get_Main_Character_Package_Pointer)
-        return NULL;
+        return "";
 
     __try
     {
@@ -432,7 +608,7 @@ const char* CVM_Get_Main_Character_Package_Wrapper()
 
     __except(EXCEPTION_EXECUTE_HANDLER)
     {
-        return NULL;
+        return "";
     }
 }
 
@@ -799,7 +975,6 @@ void LoadConfig()
 	g_Config.leftPeekShootAnimation = "Left_Peek_Shoot";
 	g_Config.rightPeekShootAnimation = "Right_Peek_Shoot";
 	g_Config.HealthRecovery = "Health_Recovery";
-	g_Config.SwitchingCharacters = "Switching_Characters";
 	
 	// Vehicles
 	g_Config.waterVehicleDriver = "Reset_Boat_Steer_Generic";
@@ -833,12 +1008,126 @@ void LoadConfig()
 	if (!file_.is_open())
 	{
         std::ofstream outFile(README_FILE);
-        outFile << "Scarface : The World Is Yours :\n\n\tScarfaceEX -\n\n\t\tKeyboard & Mouse Controls :\n\n\t\t\tAvailable Inputs -\n\n\t\t\t\tA - Z\n\t\t\t\t0 - 9\n\t\t\t\tF1 - F12\n\t\t\t\tSHIFT\n\t\t\t\tCTRL\n\t\t\t\tALT\n\t\t\t\tSPACE\n\t\t\t\tENTER\n\t\t\t\tTAB\n\t\t\t\tUP\n\t\t\t\tDOWN\n\t\t\t\tLEFT\n\t\t\t\tRIGHT\n\t\t\t\tPAGEUP\n\t\t\t\tPAGEDOWN\n\t\t\t\tHOME\n\t\t\t\tEND\n\t\t\t\tNUMPAD0 - NUMPAD9\n\t\t\t\tMOUSE1 - MOUSE5\n\t\t\t\tESC\n\t\t\t\tINSERT\n\t\t\t\tDELETE\n\t\t\t\t[\n\t\t\t\t]\n\t\t\t\t;\n\t\t\t\t'\n\t\t\t\t,\n\t\t\t\t.\n\t\t\t\t/\n\t\t\t\t`\n\t\t\t\t-\n\t\t\t\t=\n\t\t\t\t\\\n\t\t\t\t{\n\t\t\t\t}\n\t\t\t\t:\n\t\t\t\t<\n\t\t\t\t>\n\t\t\t\t?\n\t\t\t\t~\n\t\t\t\t_\n\t\t\t\t+\n\t\t\t\t|\n\t\t\t\t\"\n\t\t\t\t\!\n\t\t\t\t\@\n\t\t\t\t\#\n\t\t\t\t\₹ OR $\n\t\t\t\t\%\n\t\t\t\t\^\n\t\t\t\t\&\n\t\t\t\t\*\n\t\t\t\t\(\n\t\t\t\t\)\n\n";
-		outFile << "\t\tXbox Controller :\n\n\t\t\tAvailable Inputs -\n\n\t\t\t\tA\n\t\t\t\tB\n\t\t\t\tX\n\t\t\t\tY\n\t\t\t\tLB\n\t\t\t\tRB\n\t\t\t\tL3\n\t\t\t\tR3\n\t\t\t\tUP\n\t\t\t\tDOWN\n\t\t\t\tLEFT\n\t\t\t\tRIGHT\n\t\t\t\tSTART\n\t\t\t\tBACK\n\n";
-		outFile << "\t\tDirect Input Controller :\n\n\t\t\tAvailable Inputs -\n\n\t\t\t\t0 - 31\n\t\t\t\tNote :\n\n\t\t\t\t\tButton mapping varies by controller model\n\t\t\t\t\tOnly Buttons will work\n\n";
-		outFile << "\t\tAnimations :\n\n\t\t\tAvailable Animations -\n\n\t\t\t\tCheck 'packages/zo4/Animation.p3d'\n\n";
-		outFile << "\t\tBehavior :\n\n\t\t\tPress_Mode - Number of Input Presses required\n\t\t\tPress_Window - Specified Time, in milliseconds, within which the player has to complete their inputs\n\t\t\tCooldown - Specified time, in milliseconds, for which all the inputs will stay locked until they clear up after each successful attempt\n\n";
-		outFile << "\t\tFirst Person Camera :\n\n\t\t\tFoot_Only - Specifies whether this mode should either stay on everywhere, or only on Foot\n\t\t\tBone_Position - Character's bone, to which this camera mode should attach itself to\n\t\t\tAvailable Bones -\n\n\t\t\t\t0 --- Motion_Root\n\t\t\t\t1 --- Balance_Root\n\t\t\t\t2 --- Character_Root\n\t\t\t\t3 --- Pelvis\n\t\t\t\t4 --- Hip_L\n\t\t\t\t5 --- Knee_L\n\t\t\t\t6 --- Ankle_L\n\t\t\t\t7 --- Hip_R\n\t\t\t\t8 --- Knee_R\n\t\t\t\t9 --- Ankle_R\n\t\t\t\t10 --- Spine_1\n\t\t\t\t11 --- Spine_2\n\t\t\t\t12 --- Neck\n\t\t\t\t13 --- Head\n\t\t\t\t14 --- Clavicle_L\n\t\t\t\t15 --- Shoulder_L\n\t\t\t\t16 --- Elbow_L\n\t\t\t\t17 --- Forarm_L\n\t\t\t\t18 --- Wrist_L\n\t\t\t\t19 --- Clavicle_R\n\t\t\t\t20 --- Shoulder_R\n\t\t\t\t21 --- Elbow_R\n\t\t\t\t22 --- Forarm_R\n\t\t\t\t23 --- Wrist_R\n\t\t\t\t24 --- right_hand_attach\n\t\t\t\t25 --- Rage_Joint\n\n\t\t\tHeight_Adjust - Vertical Offset\n\t\t\tSide_Adjust - Horizontal Offset\n\t\t\tDistance_Adjust - Forward / Back Offset\n";
+		outFile << "Scarface: The World Is Yours-\n\n\t";
+		outFile << "ScarfaceEX->\n\n\t\t";
+		outFile << "Keyboard & Mouse Controls:\n\n\t\t\t";
+		outFile << "Available Inputs-\n\n\t\t\t\t";
+		outFile << "0 <-> 9\n\t\t\t\t";
+		outFile << "A <-> Z\n\t\t\t\t";
+		outFile << "F1 <-> F12\n\t\t\t\t";
+		outFile << "MOUSE1 <-> MOUSE5\n\t\t\t\t";
+		outFile << "NUMPAD0 <-> NUMPAD9\n\t\t\t\t";
+		outFile << "SHIFT\n\t\t\t\t";
+		outFile << "CTRL\n\t\t\t\t";
+		outFile << "ALT\n\t\t\t\t";
+		outFile << "SPACE\n\t\t\t\t";
+		outFile << "ENTER\n\t\t\t\t";
+		outFile << "TAB\n\t\t\t\t";
+		outFile << "UP\n\t\t\t\t";
+		outFile << "DOWN\n\t\t\t\t";
+		outFile << "LEFT\n\t\t\t\t";
+		outFile << "RIGHT\n\t\t\t\t";
+		outFile << "PAGEUP\n\t\t\t\t";
+		outFile << "PAGEDOWN\n\t\t\t\t";
+		outFile << "HOME\n\t\t\t\t";
+		outFile << "END\n\t\t\t\t";
+		outFile << "ESC\n\t\t\t\t";
+		outFile << "INSERT\n\t\t\t\t";
+		outFile << "DELETE\n\t\t\t\t";
+		outFile << "[\n\t\t\t\t";
+		outFile << "]\n\t\t\t\t";
+		outFile << ";\n\t\t\t\t";
+		outFile << "'\n\t\t\t\t";
+		outFile << ",\n\t\t\t\t";
+		outFile << ".\n\t\t\t\t";
+		outFile << "/\n\t\t\t\t";
+		outFile << "`\n\t\t\t\t";
+		outFile << "-\n\t\t\t\t";
+		outFile << "=\n\t\t\t\t";
+		outFile << "\\\n\t\t\t\t";
+		outFile << "{\n\t\t\t\t";
+		outFile << "}\n\t\t\t\t";
+		outFile << ":\n\t\t\t\t";
+		outFile << "<\n\t\t\t\t";
+		outFile << ">\n\t\t\t\t";
+		outFile << "?\n\t\t\t\t";
+		outFile << "~\n\t\t\t\t";
+		outFile << "_\n\t\t\t\t";
+		outFile << "+\n\t\t\t\t";
+		outFile << "|\n\t\t\t\t";
+		outFile << "\"\n\t\t\t\t";
+		outFile << "\!\n\t\t\t\t";
+		outFile << "\@\n\t\t\t\t";
+		outFile << "\#\n\t\t\t\t";
+		outFile << "\₹ OR $\n\t\t\t\t";
+		outFile << "\%\n\t\t\t\t";
+		outFile << "\^\n\t\t\t\t";
+		outFile << "\&\n\t\t\t\t";
+		outFile << "\*\n\t\t\t\t";
+		outFile << "\(\n\t\t\t\t";
+		outFile << "\)\n\n\t\t";
+		outFile << "Xbox Controller:\n\n\t\t\t";
+        outFile << "Available Inputs-\n\n\t\t\t\t";
+		outFile << "A\n\t\t\t\t";
+		outFile << "B\n\t\t\t\t";
+		outFile << "X\n\t\t\t\t";
+		outFile << "Y\n\t\t\t\t";
+		outFile << "LB\n\t\t\t\t";
+		outFile << "RB\n\t\t\t\t";
+		outFile << "L3\n\t\t\t\t";
+		outFile << "R3\n\t\t\t\t";
+		outFile << "UP\n\t\t\t\t";
+		outFile << "DOWN\n\t\t\t\t";
+		outFile << "LEFT\n\t\t\t\t";
+		outFile << "RIGHT\n\t\t\t\t";
+		outFile << "START\n\t\t\t\t";
+		outFile << "BACK\n\n\t\t";
+		outFile << "Direct Input Controller:\n\n\t\t\t";
+		outFile << "Available Inputs-\n\n\t\t\t\t";
+		outFile << "0 <-> 31\n\t\t\t\t";
+		outFile << "Notes->\n\n\t\t\t\t\t";
+		outFile << "Model-dependent button mapping.\n\t\t\t\t\t";
+		outFile << "Button inputs only.\n\n\t\t";
+		outFile << "Animations:\n\n\t\t\t";
+		outFile << "Available Animations-\n\n\t\t\t\t";
+		outFile << "Check 'packages/zo4/Animation.p3d'.\n\n\t\t";
+		outFile << "Behavior:\n\n\t\t\t";
+		outFile << "Press_Mode- Required sequential inputs.\n\t\t\t";
+		outFile << "Press_Window (milliseconds)- Input deadline.\n\t\t\t";
+		outFile << "Cooldown (milliseconds)- Success input block time.\n\n\t\t";
+		outFile << "First Person Camera:\n\n\t\t\t";
+		outFile << "Foot_Only- Activation scope.\n\t\t\t";
+		outFile << "Bone_Position- Camera anchor bone.\n\t\t\t";
+		outFile << "Available Bones-\n\n\t\t\t\t";
+		outFile << "0-> Motion_Root\n\t\t\t\t";
+		outFile << "1-> Balance_Root\n\t\t\t\t";
+		outFile << "2-> Character_Root\n\t\t\t\t";
+		outFile << "3-> Pelvis\n\t\t\t\t";
+		outFile << "4-> Hip_L\n\t\t\t\t";
+		outFile << "5-> Knee_L\n\t\t\t\t";
+		outFile << "6-> Ankle_L\n\t\t\t\t";
+		outFile << "7-> Hip_R\n\t\t\t\t";
+		outFile << "8-> Knee_R\n\t\t\t\t";
+		outFile << "9-> Ankle_R\n\t\t\t\t";
+		outFile << "10-> Spine_1\n\t\t\t\t";
+		outFile << "11-> Spine_2\n\t\t\t\t";
+		outFile << "12-> Neck\n\t\t\t\t";
+		outFile << "13-> Head\n\t\t\t\t";
+		outFile << "14-> Clavicle_L\n\t\t\t\t";
+		outFile << "15-> Shoulder_L\n\t\t\t\t";
+		outFile << "16-> Elbow_L\n\t\t\t\t";
+		outFile << "17-> Forarm_L\n\t\t\t\t";
+		outFile << "18-> Wrist_L\n\t\t\t\t";
+		outFile << "19-> Clavicle_R\n\t\t\t\t";
+		outFile << "20-> Shoulder_R\n\t\t\t\t";
+		outFile << "21-> Elbow_R\n\t\t\t\t";
+		outFile << "22-> Forarm_R\n\t\t\t\t";
+		outFile << "23-> Wrist_R\n\t\t\t\t";
+		outFile << "24-> right_hand_attach\n\t\t\t\t";
+		outFile << "25-> Rage_Joint\n\n\t\t\t";
+		outFile << "Height_Adjust- Vertical Offset\n\t\t\t";
+		outFile << "Side_Adjust- Horizontal Offset\n\t\t\t";
+		outFile << "Distance_Adjust- Front / Rear Offset";
 		outFile.close();
 	}
     
@@ -848,18 +1137,65 @@ void LoadConfig()
 	if (!file.is_open()) 
 	{
         std::ofstream outFile(CONFIG_FILE);
-        outFile << "[Keyboard_Mouse_Controls]\n\nFront_Key=V\nLeft_Key=A\nRight_Key=D\nBack_Key=C\nLeft_Peek_Shoot_Key=Q\nRight_Peek_Shoot_Key=E\n\n";
-		outFile << "[Xbox_Controller]\n\nFront_Button=A\nLeft_Button=B\nRight_Button=X\nBack_Button=Y\nLeft_Peek_Shoot_Button=LB\nRight_Peek_Shoot_Button=RB\n\n";
-		outFile << "[Direct_Input_Controller]\n\nFront_Button=0\nLeft_Button=1\nRight_Button=2\nBack_Button=3\nLeft_Peek_Shoot_Button=4\nRight_Peek_Shoot_Button=5\n\n";
-		outFile << "[Animations]\n\nSwitching_Characters=Switching_Characters\nFront_Animation=GEN_Action_Evade_Dive_N\nLeft_Animation=Left_Dive_Dodge_Roll_West\nRight_Animation=Right_Dive_Dodge_Roll_East\nBack_Animation=Proximity_Weapon_Attack\nLeft_Peek_Shoot_Animation=Left_Peek_Shoot\nRight_Peek_Shoot_Animation=Right_Peek_Shoot\nHealth_Recovery=Health_Recovery\n\n";
-		outFile << "[Behavior]\n\nPress_Mode=2\nPress_Window=210\nCooldown=753\n\n";
-		outFile << "[Vehicles]\n\nWater_Vehicle_Passenger=Reset_Pass_Sit\nWater_Vehicle_Driver=Reset_Boat_Steer_Generic\nLand_Vehicle_Driver=Reset_Steer_Forward\nLand_Vehicle_Driver_Reverse=Reset_Steer_Reverse\nWater_Vehicle_Idles=Water_Vehicles_Idles\nLand_Vehicle_Idles=Land_Vehicles_Idles\nDriver_Land_Vehicle_Damage=Driver_Land_Vehicle_Damage\nDriver_Land_Vehicle_Damage_Reverse=Driver_Land_Vehicle_Damage_Reverse\nDriver_Water_Vehicle_Damage=Driver_Water_Vehicle_Damage\nPassenger_Land_Vehicle_Damage=Passenger_Land_Vehicle_Damage\nPassenger_Water_Vehicle_Damage=Passenger_Water_Vehicle_Damage\nDamage_50_Calibers=Damage_50_Calibers\n\n";
-		outFile << "[First_Person_Camera]\n\nEnabled=0\nFoot_Only=0\nBone_Position=13\nHeight_Adjust=0.0\nSide_Adjust=0.0\nDistance_Adjust=0.0\n";
+		outFile << "[Keyboard_Mouse_Controls]\n\n";
+		outFile << "Front_Key=V\n";
+		outFile << "Left_Key=A\n";
+		outFile << "Right_Key=D\n";
+		outFile << "Back_Key=C\n";
+		outFile << "Left_Peek_Shoot_Key=Q\n";
+		outFile << "Right_Peek_Shoot_Key=E\n\n";
+		outFile << "[Xbox_Controller]\n\n";
+		outFile << "Front_Button=A\n";
+		outFile << "Left_Button=B\n";
+		outFile << "Right_Button=X\n";
+		outFile << "Back_Button=Y\n";
+		outFile << "Left_Peek_Shoot_Button=LB\n";
+		outFile << "Right_Peek_Shoot_Button=RB\n\n";
+		outFile << "[Direct_Input_Controller]\n\n";
+		outFile << "Front_Button=0\n";
+		outFile << "Left_Button=1\n";
+		outFile << "Right_Button=2\n";
+		outFile << "Back_Button=3\n";
+		outFile << "Left_Peek_Shoot_Button=4\n";
+		outFile << "Right_Peek_Shoot_Button=5\n\n";
+		outFile << "[Animations]\n\n";
+		outFile << "Front_Animation=GEN_Action_Evade_Dive_N\n";
+		outFile << "Left_Animation=Left_Dive_Dodge_Roll_West\n";
+		outFile << "Right_Animation=Right_Dive_Dodge_Roll_East\n";
+		outFile << "Back_Animation=Proximity_Weapon_Attack\n";
+		outFile << "Left_Peek_Shoot_Animation=Left_Peek_Shoot\n";
+        outFile << "Right_Peek_Shoot_Animation=Right_Peek_Shoot\n";
+		outFile << "Health_Recovery=Health_Recovery\n\n";
+		outFile << "[Behavior]\n\n";
+		outFile << "Press_Mode=2\n";
+		outFile << "Press_Window=210\n";
+		outFile << "Cooldown=753\n\n";
+		outFile << "[Vehicles]\n\n";
+		outFile << "Water_Vehicle_Passenger=Reset_Pass_Sit\n";
+		outFile << "Water_Vehicle_Driver=Reset_Boat_Steer_Generic\n";
+		outFile << "Land_Vehicle_Driver=Reset_Steer_Forward\n";
+		outFile << "Land_Vehicle_Driver_Reverse=Reset_Steer_Reverse\n";
+		outFile << "Water_Vehicle_Idles=Water_Vehicles_Idles\n";
+		outFile << "Land_Vehicle_Idles=Land_Vehicles_Idles\n";
+		outFile << "Driver_Land_Vehicle_Damage=Driver_Land_Vehicle_Damage\n";
+		outFile << "Driver_Land_Vehicle_Damage_Reverse=Driver_Land_Vehicle_Damage_Reverse\n";
+		outFile << "Driver_Water_Vehicle_Damage=Driver_Water_Vehicle_Damage\n";
+		outFile << "Passenger_Land_Vehicle_Damage=Passenger_Land_Vehicle_Damage\n";
+		outFile << "Passenger_Water_Vehicle_Damage=Passenger_Water_Vehicle_Damage\n";
+		outFile << "Damage_50_Calibers=Damage_50_Calibers\n\n";
+		outFile << "[First_Person_Camera]\n\n";
+		outFile << "Enabled=0\n";
+		outFile << "Foot_Only=0\n";
+		outFile << "Bone_Position=13\n";
+		outFile << "Height_Adjust=0.0\n";
+		outFile << "Side_Adjust=0.0\n";
+		outFile << "Distance_Adjust=0.0";
         outFile.close();
         return;
     }
     
-    std::string line, section;
+    std::string line, 
+				section;
     
 	while (std::getline(file, line)) 
 	{
@@ -879,7 +1215,8 @@ void LoadConfig()
 		if (pos == std::string::npos) 
 			continue;
         
-        std::string key = Trim(line.substr(0, pos)), value = Trim(line.substr(pos + 1));
+        std::string key = Trim(line.substr(0, pos)), 
+					value = Trim(line.substr(pos + 1));
 		
 		// Inputs Parsing
         if (section == "Keyboard_Mouse_Controls") 
@@ -967,9 +1304,6 @@ void LoadConfig()
             
 			if (key == "Health_Recovery" && !value.empty()) 
 				g_Config.HealthRecovery = value; 
-            
-			if (key == "Switching_Characters" && !value.empty()) 
-				g_Config.SwitchingCharacters = value; 
         }
 		
 		if (section == "Behavior") 
@@ -1274,8 +1608,8 @@ bool InitPlayAnimation()
 		return false;
     
     uintptr_t funcAddr = 0;
-    ReadCall(addr + 2, &funcAddr);
-    g_PlayAnimationFunc = (PlayAnimationFunc)funcAddr;
+    ReadCall(addr + 2, &funcAddr);    
+	g_PlayAnimationFunc = (PlayAnimationFunc)funcAddr;
     
 	return true;
 }
@@ -1301,7 +1635,7 @@ bool InitGetBonePosition()
     
     uintptr_t funcAddr = 0;
     ReadCall(addr + 2, &funcAddr);
-    g_GetBonePosition = (GetBonePositionFunc)funcAddr;
+	g_GetBonePosition = (GetBonePositionFunc)funcAddr;
     
 	return true;
 }
@@ -1337,7 +1671,71 @@ CharacterObject* GetPlayer()
 	{ 
 		return NULL; 
 	}
+}
+
+// Loading Tracker
+bool Loading_Complete(CharacterObject* player)
+{
+	if (!player)
+        return false;
+
+    bool result = false;
+
+    __try
+    {
+        __asm
+        {
+            push player
+            mov eax, 0x0047B770
+            call eax
+            add esp, 4
+            mov result, al
+        }
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return false; 
+	}
+
+    return result;
 } 
+
+// Is the character dead?
+bool Dead_Body_Tracker(CharacterObject* character)
+{
+	bool deadBodyTracker = false;
+	
+	__try
+	{
+		deadBodyTracker = *(int*)((uintptr_t)character + 0x112);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		deadBodyTracker = false;
+	}
+	
+	return deadBodyTracker;
+}
+
+// Gun Aiming Tracker
+bool Gun_Up_State(CharacterObject* character)
+{
+	bool gunUpState = false;
+	
+	__try
+	{
+		gunUpState = *(int*)((uintptr_t)character + 0x380 + 0x4);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		gunUpState = false;
+	}
+	
+	return gunUpState;
+}
 
 // Damage Weapon Detector
 int Damage_Weapon(CharacterObject* character)
@@ -1354,8 +1752,8 @@ int Damage_Weapon(CharacterObject* character)
 	}
 } 
 
-// Animation Priority ID
-int Get_Animation_Priority_ID(CharacterObject* character)
+// Current Drawn Weapon Detector
+int Get_Current_Drawn_Weapon(CharacterObject* character)
 {
     if (!character)
         return -1;
@@ -1367,7 +1765,35 @@ int Get_Animation_Priority_ID(CharacterObject* character)
         __asm
         {
             push character
-            mov eax, 0x005874B0
+            mov eax, 0x005882C0
+            call eax
+            add esp, 4
+            mov result, eax
+        }
+    }
+
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        return -1;
+    }
+
+    return result;
+} 
+
+// Current Weapon Detector
+int Get_Current_Weapon(CharacterObject* character)
+{
+    if (!character)
+        return -1;
+
+    int result = -1;
+
+    __try
+    {
+        __asm
+        {
+            push character
+            mov eax, 0x005882A0
             call eax
             add esp, 4
             mov result, eax
@@ -1534,6 +1960,24 @@ int Get_Vehicle_State(CharacterObject* npc)
 	}
 }
 
+// Character's Swimming State Detector
+bool Character_Is_Swimming(CharacterObject* character)
+{
+	bool isCharacterSwimming = false;
+	
+	__try
+	{
+		isCharacterSwimming = *(int*)((uintptr_t)character + 0x2DC + 0x9);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		isCharacterSwimming = false;
+	}
+	
+	return isCharacterSwimming;
+}
+
 // Characters' Vehicle Types' Detector
 bool NPC_IsInCar(CharacterObject* npc)
 {
@@ -1548,6 +1992,33 @@ bool NPC_IsInCar(CharacterObject* npc)
         {
             push npc
             mov eax, 0x005873E0
+            call eax
+            add esp, 4
+            mov result, al
+        }
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return false; 
+	}
+
+    return result;
+}
+
+bool Rage_Mode_Active(CharacterObject* npc)
+{
+    if (!npc)
+        return false;
+
+    bool result = false;
+
+    __try
+    {
+        __asm
+        {
+            push npc
+            mov eax, 0x0058ABB0
             call eax
             add esp, 4
             mov result, al
@@ -1584,6 +2055,60 @@ bool NPC_IsInBoat(CharacterObject* npc)
 	__except(EXCEPTION_EXECUTE_HANDLER) 
 	{ 
 		return false; 
+	}
+
+    return result;
+}
+
+// Current Voice Timespan of Characters
+int Current_Voice_MS(CharacterObject* character)
+{
+    if (!character)
+        return -1;
+
+    int result = -1;
+
+    __try
+    {
+        __asm
+        {
+            push character
+            mov eax, 0x00587280
+            call eax
+			add esp, 4
+            mov result, eax
+        }
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return -1; 
+	}
+
+    return result;
+}
+
+int Wall_Cover_Available(CharacterObject* character)
+{
+    if (!character)
+        return -1;
+
+    int result = -1;
+
+    __try
+    {
+        __asm
+        {
+            mov ecx, character
+            mov eax, 0x005879F0
+            call eax
+            mov result, eax
+        }
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return -1; 
 	}
 
     return result;
@@ -1642,7 +2167,7 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
     // Converting std::string To char* For Hash Function
     char animBuffer[256];
     strncpy_s(animBuffer, animName.c_str(), sizeof(animBuffer) - 1);
-    animBuffer[sizeof(animBuffer) - 1] = '\0';
+	animBuffer[sizeof(animBuffer) - 1] = '\0';
     unsigned int hash = Hash(animBuffer);
     
     __try 
@@ -1659,9 +2184,10 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
 // 'CharacterObject :: RequestAnimation()' Triggers Under Appropriate Conditions
 void Dodge(CharacterObject* player, const std::string& animName) 
 {
-    bool ActionMap = IsInVehicle();
+    bool ActionMap = IsInVehicle(),
+		 Swimming = Character_Is_Swimming(player);
 	
-	if (ActionMap)
+	if (ActionMap || Swimming)
 		return;
 	
 	PlayAnimation(player, animName, 0);
@@ -1681,8 +2207,7 @@ void __fastcall Camera_SetPositionHooked(void* camera, void* edx, Vector* pos)
                 __try 
 				{
                     *(Vector*)((int)camera + 100) = *pos;
-                    (*(void(__thiscall**)(int, int))(**(int**)((int)camera + 132) + 100))
-                        (*(int*)((int)camera + 132), (int)camera + 52);
+                    (*(void(__thiscall**)(int, int))(**(int**)((int)camera + 132) + 100))(*(int*)((int)camera + 132), (int)camera + 52);
                 } 
 				
 				__except(EXCEPTION_EXECUTE_HANDLER) 
@@ -1733,8 +2258,7 @@ void __fastcall Camera_SetPositionHooked(void* camera, void* edx, Vector* pos)
 	__try 
 	{
         *(Vector*)((int)camera + 100) = *pos;
-        (*(void(__thiscall**)(int, int))(**(int**)((int)camera + 132) + 100))
-            (*(int*)((int)camera + 132), (int)camera + 52);
+        (*(void(__thiscall**)(int, int))(**(int**)((int)camera + 132) + 100))(*(int*)((int)camera + 132), (int)camera + 52);
     } 
 	
 	__except(EXCEPTION_EXECUTE_HANDLER) 
@@ -1748,12 +2272,14 @@ bool InstallCameraHook()
     if (!g_OriginalSetPosition) 
 		return false;
     
-	uintptr_t source = (uintptr_t)g_OriginalSetPosition, target = (uintptr_t)&Camera_SetPositionHooked;
-    int relativeOffset = (int)(target - source - 5);
+	uintptr_t source = (uintptr_t)g_OriginalSetPosition, 
+			  target = (uintptr_t)&Camera_SetPositionHooked;
+    
+	int relativeOffset = (int)(target - source - 5);
     DWORD oldProtect;
     
 	if (!VirtualProtect((LPVOID)source, 5, PAGE_EXECUTE_READWRITE, &oldProtect))
-        return false;
+		return false;
     
     *(BYTE*)(source) = 0xE9;
     *(int*)(source + 1) = relativeOffset;
@@ -1775,7 +2301,7 @@ void CheckKeyboardKey(CharacterObject* player, int key, int index, PressTracker&
         if (tracker.ShouldTrigger(g_Config.pressMode)) 
 		{
             Dodge(player, animation);
-            g_LastDodgeTime = now;
+			g_LastDodgeTime = now;
             tracker.Reset();
         }
     }
@@ -2088,7 +2614,9 @@ bool IsAnyRawInputActive()
 
 void CheckVehicleAnimation(CharacterObject* player)
 {
-    int vehicleState = *(int*)ADDR_VehicleState, Reversing = Land_Vehicle_Reverse_Driving(player);
+    int vehicleState = *(int*)ADDR_VehicleState, 
+		Reversing = Land_Vehicle_Reverse_Driving(player);
+	
 	unsigned long now = GetTickCount();
 	
 	if (vehicleState <= 0 || vehicleState > 2)
@@ -2140,7 +2668,8 @@ void CheckVehicleAnimation(CharacterObject* player)
     {
         if (!g_VehicleAnim.idle)
 		{
-			bool entryDelayMet = (now - g_VehicleAnim.entryTime) >= 7532UL, releaseDelayMet = (now - g_VehicleAnim.inputReleasedAt) >= 7532UL;
+			bool entryDelayMet = (now - g_VehicleAnim.entryTime) >= 7532UL, 
+				 releaseDelayMet = (now - g_VehicleAnim.inputReleasedAt) >= 7532UL;
 			
 			if (entryDelayMet && releaseDelayMet)
 			{
@@ -2175,12 +2704,16 @@ void CheckNPCVehicleAnimations(void** pData, int count)
         if (!npc || npc == mainChar)
             continue;
 
-        bool isBoat = NPC_IsInBoat(npc), isCar = NPC_IsInCar(npc);
+        bool isBoat = NPC_IsInBoat(npc), 
+			 isCar = NPC_IsInCar(npc);
 
         if (!isBoat && !isCar)
             continue;
 
-        int seatingPosition = Get_Vehicle_State(npc), Weapon_State = Get_Weapon_State(npc), Reversing = Land_Vehicle_Reverse_Driving(npc), Shooting = Vehicle_Shooting(npc);
+        int seatingPosition = Get_Vehicle_State(npc), 
+			Weapon_State = Get_Weapon_State(npc), 
+			Reversing = Land_Vehicle_Reverse_Driving(npc), 
+			Shooting = Vehicle_Shooting(npc);
 
         if (seatingPosition != 1 || Weapon_State || Shooting)
         {
@@ -2190,10 +2723,13 @@ void CheckNPCVehicleAnimations(void** pData, int count)
 
         __try
         {
-            float curX = *(float*)((uintptr_t)npc + 0x34 + 48), curZ = *(float*)((uintptr_t)npc + 0x34 + 56);
             NPCAnimState& state = g_NPCStates[i];
-            float dx = curX - state.lastX, dz = curZ - state.lastZ;
-            bool isMoving = (dx * dx + dz * dz) > 0.01f;
+			float curX = *(float*)((uintptr_t)npc + 0x34 + 48), 
+				  curZ = *(float*)((uintptr_t)npc + 0x34 + 56), 
+				  dx = curX - state.lastX, 
+				  dz = curZ - state.lastZ;
+            
+			bool isMoving = (dx * dx + dz * dz) > 0.01f;
             state.lastX = curX;
             state.lastZ = curZ;
 
@@ -2241,7 +2777,9 @@ void CheckNPCVehicleAnimations(void** pData, int count)
 // Vehicle Damage Animation Player
 void ProcessDamageAnim(CharacterObject* character, DamageAnimState& state, bool isBoat)
 {
-    int currentHealth = GetCharacterHealth(character), Seat = Get_Vehicle_State(character), Reversing = Land_Vehicle_Reverse_Driving(character);
+    int currentHealth = GetCharacterHealth(character), 
+		Seat = Get_Vehicle_State(character), 
+		Reversing = Land_Vehicle_Reverse_Driving(character);
 
     if (currentHealth <= 0)
         return;
@@ -2252,7 +2790,8 @@ void ProcessDamageAnim(CharacterObject* character, DamageAnimState& state, bool 
         return;
     }
 
-    bool healthDropped = (currentHealth < state.lastHealth), stillAlive = (currentHealth > 1);
+    bool healthDropped = (currentHealth < state.lastHealth), 
+		 stillAlive = (currentHealth > 1);
 
     if (healthDropped && stillAlive)
         state.animPlayed = false;
@@ -2299,8 +2838,12 @@ void CheckNPCVehicleDamage(void** pData, int count)
         if (!npc)
             continue;
 
-        bool isBoat = NPC_IsInBoat(npc), Vehicle_Detected = isBoat || NPC_IsInCar(npc);
-        int Injuries_50_Caliber = Get_50_Calibers(npc), Driver_Passenger = Actual_Vehicle_Intention(npc), Weapon_Damage = Damage_Weapon(npc);
+        bool isBoat = NPC_IsInBoat(npc), 
+			 Vehicle_Detected = isBoat || NPC_IsInCar(npc);
+        
+		int Injuries_50_Caliber = Get_50_Calibers(npc), 
+			Driver_Passenger = Actual_Vehicle_Intention(npc), 
+			Weapon_Damage = Damage_Weapon(npc);
 
         if (!Vehicle_Detected || Injuries_50_Caliber || !Driver_Passenger || Weapon_Damage == -1)
         {
@@ -2346,7 +2889,8 @@ void Damages_50_Calibers(void** pData, int count)
             continue;
         }
 
-        bool healthDropped = (currentHealth < state.lastHealth), stillAlive = (currentHealth > 1);
+        bool healthDropped = (currentHealth < state.lastHealth), 
+			 stillAlive = (currentHealth > 1);
 
         if (healthDropped && stillAlive)
             state.animPlayed = false;
@@ -2361,6 +2905,28 @@ void Damages_50_Calibers(void** pData, int count)
     }
 }
 
+void Combat_Tutorial_Targets_Tracker(void** pData, int count)
+{	
+	if (!pData || count <= 0)
+		return;
+	
+	int counter = 0;
+	
+	for (int i = 0; i < count; i++)
+	{
+		CharacterObject* character = (CharacterObject*)pData[i];
+		bool deadBodyTracker = false;
+		
+		if (!deadBodyTracker)
+			counter++;
+		
+		if (counter > 1)
+			break;
+	}
+	
+	CTMNVS_Struct.targetsPresent = (counter > 1);
+}
+
 void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
 {
 	if (!pData || count <= 0)
@@ -2373,7 +2939,9 @@ void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
         if (!character)
             continue;
 		
-		bool Inside_Water_Vehicle = NPC_IsInBoat(character), Inside_Land_Vehicle = NPC_IsInCar(character), Inside_Vehicle = (Inside_Water_Vehicle || Inside_Land_Vehicle);
+		bool Inside_Water_Vehicle = NPC_IsInBoat(character), 
+			 Inside_Land_Vehicle = NPC_IsInCar(character), 
+			 Inside_Vehicle = (Inside_Water_Vehicle || Inside_Land_Vehicle);
 		
 		if (!Inside_Vehicle)
 			continue;
@@ -2383,7 +2951,10 @@ void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
 		if (animationRequestID)
 			continue;
 		
-		bool reset = (!animationRequestID), landVehicleDriverReversing = Land_Vehicle_Reverse_Driving(character), driver = Get_Vehicle_State(character), passenger = Get_Vehicle_Passenger_State(character);
+		bool reset = (!animationRequestID), 
+			 landVehicleDriverReversing = Land_Vehicle_Reverse_Driving(character), 
+			 driver = Get_Vehicle_State(character), 
+			 passenger = Get_Vehicle_Passenger_State(character);
 		
 		if (reset)
 		{
@@ -2423,40 +2994,48 @@ void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
 // Health Recovery Animation
 void Health_Recovery_Function(CharacterObject* player)
 {
-	int currentHealth = GetCharacterHealth(player), actionMap = *(int*)ADDR_VehicleState, weapon_State = Get_Weapon_State(player); 
+	int currentHealth = GetCharacterHealth(player),
+		currentAnimation = Get_Animation_Request_ID(player), 
+		actionMap = *(int*)ADDR_VehicleState,
+		currentDrawnWeapon = Get_Current_Drawn_Weapon(player),
+		currentWeapon = Get_Current_Weapon(player), 
+		weapon_State = Get_Weapon_State(player);
+
+	bool refreshFunction = (actionMap != 0 || currentHealth <= 0 || weapon_State != 0 || currentAnimation || HRS_Struct.lastHealth == -1 || currentDrawnWeapon || currentWeapon);
 	
-	if (actionMap != 0 || currentHealth <= 0 || weapon_State != 0)
-		return;
-	
-	if (HRS_Struct.lastHealth == -1)
+	if (refreshFunction)
 	{
 		HRS_Struct.lastHealth = currentHealth;
 		HRS_Struct.lastX = *(float*)((uintptr_t)player + 0x34 + 48);
 		HRS_Struct.lastY = *(float*)((uintptr_t)player + 0x34 + 52);
 		HRS_Struct.lastZ = *(float*)((uintptr_t)player + 0x34 + 56);
 		
-		return;
+		return;	
 	}
 	
-	bool healthGained = (currentHealth > HRS_Struct.lastHealth);
-	int resultantHealth = currentHealth - HRS_Struct.lastHealth;
+	float currentX = *(float*)((uintptr_t)player + 0x34 + 48), 
+		  currentY = *(float*)((uintptr_t)player + 0x34 + 52), 
+		  currentZ = *(float*)((uintptr_t)player + 0x34 + 56), 
+		  dx = currentX - HRS_Struct.lastX, 
+		  dy = currentY - HRS_Struct.lastY, 
+		  dz = currentZ - HRS_Struct.lastZ;
 	
-	if (healthGained && (resultantHealth > 2300))
-		HRS_Struct.animationPlayed = false;
+	bool healthGained = (currentHealth > HRS_Struct.lastHealth),
+		 moving = (dx * dx + dy * dy + dz * dz) > 0.01f,
+		 triggerValid = (healthGained && !moving && !HRS_Struct.animationPlayed);
 	
-	float currentX = *(float*)((uintptr_t)player + 0x34 + 48), currentY = *(float*)((uintptr_t)player + 0x34 + 52), currentZ = *(float*)((uintptr_t)player + 0x34 + 56), dx = currentX - HRS_Struct.lastX, dy = currentY - HRS_Struct.lastY, dz = currentZ - HRS_Struct.lastZ;
-	bool moving = (dx * dx + dy * dy + dz * dz) > 0.01f;
 	HRS_Struct.lastX = currentX;                        
 	HRS_Struct.lastY = currentY;
 	HRS_Struct.lastZ = currentZ;
 	
-	if (!HRS_Struct.animationPlayed && healthGained && !moving)
+	if (triggerValid)
 	{
 		PlayAnimation(player, g_Config.HealthRecovery, 0);
 		HRS_Struct.animationPlayed = true;
 	}
 	
 	HRS_Struct.lastHealth = currentHealth;
+	HRS_Struct.animationPlayed = false;
 } 
 
 // ScarfaceEX Features' Validation Tracker
@@ -2466,8 +3045,17 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 	
 	__try
 	{
-		float currentX = *(float*)((uintptr_t)p + 0x34 + 48), currentY = *(float*)((uintptr_t)p + 0x34 + 52), currentZ = *(float*)((uintptr_t)p + 0x34 + 56);
-		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f)), currentNIS = Is_NIS_Active(), currentGamePaused = Is_Game_Paused_HUD(), currentScreenFXTransition = Get_Screen_Effects_Transition_Blacked_Out(), currentTeleportation = Get_Is_Teleporting(), currentDeathStatus = Main_Character_Death_Status();
+		float currentX = *(float*)((uintptr_t)p + 0x34 + 48), 
+			  currentY = *(float*)((uintptr_t)p + 0x34 + 52), 
+			  currentZ = *(float*)((uintptr_t)p + 0x34 + 56);
+		
+		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f)), 
+			 currentNIS = Is_NIS_Active(), 
+			 currentGamePaused = Is_Game_Paused_HUD(), 
+			 currentScreenFXTransition = Get_Screen_Effects_Transition_Blacked_Out(), 
+			 currentTeleportation = Get_Is_Teleporting(), 
+			 currentDeathStatus = Main_Character_Death_Status();
+		
 		scarfaceEXTriggerValid = (!currentNIS && !currentGamePaused && !currentScreenFXTransition && !currentTeleportation && !currentDeathStatus && !Main_Menu);
 	}
 	
@@ -2486,9 +3074,14 @@ bool Character_Switching_Trigger_Valid(CharacterObject* p)
 	
 	__try
 	{
-		int currentAnimation = Get_Animation_Request_ID(p);
-		bool currentNormalGameState = Is_Game_In_Normal_Game_State(), currentMission = Get_Mission_Active(), Player_Vehicle_Active = IsInVehicle();
-		characterSwitchingTriggerValid = (currentNormalGameState && !currentMission && !Player_Vehicle_Active && !currentAnimation);
+		bool currentNormalGameState = Is_Game_In_Normal_Game_State(), 
+			 currentMission = Get_Mission_Active(),
+			 currentAnimation = (Get_Animation_Request_ID(p) != -1),
+			 currentVocalMS = (Current_Voice_MS(p) == -1),
+			 currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
+			 Player_Vehicle_Active = IsInVehicle();
+		
+		characterSwitchingTriggerValid = (currentNormalGameState && !currentMission && !Player_Vehicle_Active && currentAnimation && currentVocalMS && currentGlobalSoundMS);
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
@@ -2514,51 +3107,396 @@ void Main_Character_Switching_Function(CharacterObject* player)
 	if (currentPackage == "MCP_ArmyTony")
 		return;
 		
-    bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage), Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer"), Last_Valid_Package = (MCS_Struct.lastPackage == "MCP_Assassin" || MCS_Struct.lastPackage == "MCP_Driver" || MCS_Struct.lastPackage == "MCP_Enforcer");
+    bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage),
+		 Island_Package = (currentPackage == "MCP_HawaiianTony" || currentPackage == "MCP_HawaiianShadesTony" || currentPackage == "MCP_SandyShadesTony" || currentPackage == "MCP_SandyTony"),
+		 Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer");
 
     if (Main_Character_Switched)
-    {
-        if (Last_Valid_Package && !Valid_Package)
-		{
-			MCS_Struct.phoneCallTriggered = false;
-			MCS_Struct.packageIteration = 0;
-		}
-		
+	{
 		if (Valid_Package)
-			MCS_Struct.lastTimer = GetTickCount();
+			RunScript("Schedule(\"777\", \"PCM_PlayPhoneCall\", \"tony\", \"call_cleaner_00\");");
 		
-		MCS_Struct.animationPlayed = false;
-    }
+		else
+		{
+			RunScript("Schedule(\"1\", \"SetBlockingActionMap\", \"1\"); Schedule(\"2\", \"SoundFadeinMix\", \"duck_cinematics\");");
+			MCS_Struct.narratorQuotesTriggered = true;
+			MCS_Struct.lastTimer = GetTickCount();
+			// debugFile << "Narrator Quotes Triggered: "<< MCS_Struct.narratorQuotesTriggered <<"\n";
+			
+			if (Island_Package)
+			{
+				if (MCS_Struct.islandsNarratorQuotes == 0UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se57\", \"se57\");");
+				
+				if (MCS_Struct.islandsNarratorQuotes == 1UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se58\", \"se58\");");
+				
+				if (MCS_Struct.islandsNarratorQuotes == 2UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se59\", \"se59\");");
+				
+				if (MCS_Struct.islandsNarratorQuotes == 3UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se60\", \"se60\");");
+				
+				if (MCS_Struct.islandsNarratorQuotes == 4UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se61\", \"se61\");");
+				
+				if (MCS_Struct.islandsNarratorQuotes == 5UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se62\", \"se62\");");
+				
+				MCS_Struct.islandsNarratorQuotes = Islands_Narrator_Quotes();
+			}
+			
+			else
+			{
+				if (MCS_Struct.miamiNarratorQuotes == 0UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"ee_00\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 1UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"introduction_00\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 2UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"mojo\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 3UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_01\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 4UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_02\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 5UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_03\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 6UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_04\");");
+				
+				if (MCS_Struct.miamiNarratorQuotes == 7UL)
+					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_05\");");
+				
+				MCS_Struct.miamiNarratorQuotes = Miami_Narrator_Quotes();
+			}	
+		}
+	}
+	
+    MCS_Struct.lastPackage = currentPackage;
+}
+
+void Narrator_Quotes_Reset_Input()
+{	
+	unsigned long currentTimer = GetTickCount();
+	bool currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
+		 timerTracker = ((currentTimer - MCS_Struct.lastTimer) > 1111UL),
+		 globalSoundMSTracker = (currentGlobalSoundMS && MCS_Struct.lastGlobalSoundMS && MCS_Struct.narratorQuotesTriggered && timerTracker);
+		 
+	if (globalSoundMSTracker)
+	{
+		RunScript("ScheduleAlways(\"1\", \"SoundFadeoutMix\", \"duck_cinematics\"); ScheduleAlways(\"23\", \"SetBlockingActionMap\", \"0\");");
+		MCS_Struct.narratorQuotesTriggered = false;
+		// debugFile << "Input Reset: "<< (!MCS_Struct.narratorQuotesTriggered) <<"\n";
+	}
+	
+	MCS_Struct.lastGlobalSoundMS = currentGlobalSoundMS;
+}
+
+bool Combat_Tutorial_Weapon_Pickup_Valid(CharacterObject* player)
+{
+	bool combatTutorialWeaponPickupValid = false;
+	
+	__try
+	{
+		float currentX = *(float*)((uintptr_t)player + 0x34 + 48), 
+			  currentZ = *(float*)((uintptr_t)player + 0x34 + 56);
+		
+		combatTutorialWeaponPickupValid = (currentX >= -9367.539f) && (currentZ <= -8076.217f);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		combatTutorialWeaponPickupValid = false;
+	}
+	
+	return combatTutorialWeaponPickupValid;
+}
+
+void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* player)
+{	
+	int currentDrawnWeapon = Get_Current_Drawn_Weapon(player);	
+	bool currentWeapon = (Get_Current_Weapon(player) > 0), 
+		 playerVehicleActive = IsInVehicle(), 
+		 globalSoundActive = (GlobalSoundGetCurrentMs() != -1), 
+		 weaponYetToPickUp = (Combat_Tutorial_Weapon_Pickup_Valid(player) && !CTMNVS_Struct.weaponPickedUp), 
+		 currentWallCover = Wall_Cover_Available(player), 
+		 currentRageMode = Rage_Mode_Active(player), 
+		 currentVocalMS = (Current_Voice_MS(player) != -1),		 
+		 aimingWeapon = (Gun_Up_State(player) && currentWeapon),
+		 weaponPickedUpAgain = (currentDrawnWeapon != CTMNVS_Struct.lastDrawnWeapon),
+		 ak47 = (weaponPickedUpAgain && CTMNVS_Struct.weaponPickedUp && currentDrawnWeapon && CTMNVS_Struct.lastDrawnWeapon && !CTMNVS_Struct.weaponChanged),
+		 missionStarted = !CTMNVS_Struct.missionStarted;
 	
 	unsigned long currentTimer = GetTickCount();
-	bool Timer = (((currentTimer - MCS_Struct.lastTimer) >= 1357) && (MCS_Struct.currentIteration != -1)), Timelapse = ((currentTimer - MCS_Struct.lastTimer) >= 1357), Time = (!Timer && Timelapse);
-
-    if (!MCS_Struct.animationPlayed)
-    {
-        PlayAnimation(player, g_Config.SwitchingCharacters, 0);
-        MCS_Struct.animationPlayed = true;
-    }
 	
-    if (!MCS_Struct.phoneCallTriggered && Valid_Package)
-    {		
-		if (Timer && !MCS_Struct.packageIteration)
+	if (ak47)
+	{
+		CTMNVS_Struct.weaponChanged = true;
+		CTMNVS_Struct.lastTimer = currentTimer;
+		return;
+	}
+	
+	if (missionStarted)
+	{
+		RunScript("Schedule(\"1235\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_01\"); Schedule(\"3571\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_17\");");
+		CTMNVS_Struct.missionStarted = true;
+		return;
+	}
+	
+	CTMNVS_Struct.lastDrawnWeapon = currentDrawnWeapon;
+	bool triggerValid = (!CTMNVS_Struct.missionComplete && CTMNVS_Struct.missionStarted && !currentRageMode && !globalSoundActive),
+		 timerValid = (CTMNVS_Struct.introductionDone || aimingWeapon),
+		 introductionTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > 5555UL),
+		 playTimeTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > CTMNVS_Struct.quoteDelay),
+		 triggerNarratorsQuotes = timerValid ? (triggerValid && playTimeTimer) : (triggerValid && introductionTimer),
+		 missionComplete = (!currentRageMode && CTMNVS_Struct.lastRageMode && !CTMNVS_Struct.missionComplete), 
+		 weaponPickedUp = (currentWeapon && !CTMNVS_Struct.weaponPickedUp);
+	
+	if (missionComplete)
+	{
+		RunScript("Schedule(\"3572\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_16\");");
+		CTMNVS_Struct.missionComplete = true;
+		return;
+	}
+	
+	if (weaponPickedUp)
+	{
+		RunScript("Schedule(\"1\", \"GlobalSoundStop\"); Schedule(\"2\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_05\");");
+		CTMNVS_Struct.lastTimer = currentTimer;
+		CTMNVS_Struct.weaponPickedUp = true;
+		CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+		return;
+	}
+	
+	if (triggerNarratorsQuotes)
+	{		
+		if (!CTMNVS_Struct.introductionDone)
 		{
-			RunScript("'MainCharacter'.RequestCellPhoneAnswer(0); HUD_Hide();");
-			MCS_Struct.packageIteration = 1;
+			CTMNVS_Struct.introductionDone = true;
+			CTMNVS_Struct.lastTimer = currentTimer;
+			return;
+		}
+		
+		if (currentWallCover)
+		{			
+			if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 5UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_10\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 4UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_09\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 3UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_08\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+		}
+		
+		if (weaponYetToPickUp)
+		{
+			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_06\");");
+			CTMNVS_Struct.lastTimer = currentTimer;
+			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+			return;
+		}
+		
+		if (CTMNVS_Struct.weaponChanged)
+		{
+			if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 3UL || CTMNVS_Struct.nextQuote == 4UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_14\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 5UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_15\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+		}
+		
+		if (CTMNVS_Struct.targetsPresent || aimingWeapon)
+		{
+			if (CTMNVS_Struct.nextQuote == 0UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_11\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 1UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_13\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 2UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_18\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 3UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_12\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
+			
+			if (CTMNVS_Struct.nextQuote == 5UL)
+			{
+				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_07\");");
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.lastTimer = currentTimer;
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+				return;
+			}
 		}
 
-        if ((MCS_Struct.lastIteration > MCS_Struct.currentIteration) && (MCS_Struct.currentIteration == -1))
-        {
-            RunScript("GlobalSoundStop(); 'MainCharacter'.RequestCellPhoneEnd(); SoundFadeoutMix(\"duck_phonecall\"); HUD_Show();");
-            MCS_Struct.phoneCallTriggered = true;
-        }
+		if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 5UL)
+		{
+			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_04\");");
+			CTMNVS_Struct.nextQuote = Random_Quotes();
+			CTMNVS_Struct.lastTimer = currentTimer;
+			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+			return;
+		}
 		
-		if (Time)
-			MCS_Struct.phoneCallTriggered = true;
-    } 
+		if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 4UL)
+		{
+			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_03\");");
+			CTMNVS_Struct.nextQuote = Random_Quotes();
+			CTMNVS_Struct.lastTimer = currentTimer;
+			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+			return;
+		}
+		
+		if (CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 3UL)
+		{
+			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_02\");");
+			CTMNVS_Struct.nextQuote = Random_Quotes();
+			CTMNVS_Struct.lastTimer = currentTimer;
+			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+			return;
+		}
+	}
+	
+	CTMNVS_Struct.lastRageMode = currentRageMode;
+}
 
-    MCS_Struct.lastPackage = currentPackage;
-    MCS_Struct.lastIteration = MCS_Struct.currentIteration;
+bool MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid(CharacterObject* player)
+{
+	bool cutsceneTriggerValid = false;
+	
+	__try
+	{
+		float currentX = *(float*)((uintptr_t)player + 0x34 + 48), 
+			  currentZ = *(float*)((uintptr_t)player + 0x34 + 56);
+			  
+		cutsceneTriggerValid = ((currentX >= -2090.0f) && (currentX <= -2070.0f) && (currentZ >= -1760.0f) && (currentZ <= -1750.0f) && !UCS_Struct.MNIS_S01_4_Cops_Are_Here);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		cutsceneTriggerValid = false;
+	}
+	
+	return cutsceneTriggerValid;
+}
+
+void Unused_Cutscenes_Function(CharacterObject* player)
+{
+	bool MNIS_S01_4_Cops_Are_Here = MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid(player);
+	
+	if (MNIS_S01_4_Cops_Are_Here)
+	{
+		RunScript("stxdfoahmdk(\"MNIS_S01_4_Cops_Are_Here\", \"\", \"NIS\");");
+		UCS_Struct.MNIS_S01_4_Cops_Are_Here = true;
+	}
+}
+
+bool Narrator_Death_Quotes_Trigger_Valid(CharacterObject* player)
+{
+	bool narratorDeathQuotesTriggerValid = false;
+	
+	__try
+	{	
+		unsigned long currentTimer = GetTickCount();
+		bool currentDeathStatus = Main_Character_Death_Status(),
+			 currentAnimation = (Get_Animation_Request_ID(player) > 0),
+			 currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
+			 currentVocalMS = (Current_Voice_MS(player) == -1),
+			 timerTracker = ((currentTimer - NDQS_Struct.lastTimer) > 333UL),
+			 deathStatusTracker = (currentDeathStatus && NDQS_Struct.lastDeathStatus),
+			 globalSoundMSTracker = (currentGlobalSoundMS && NDQS_Struct.lastGlobalSoundMS),
+			 vocalMSTracker = (currentVocalMS && NDQS_Struct.lastVocalMS),
+			 deathStatusChanged = (currentDeathStatus && !NDQS_Struct.lastDeathStatus);
+			 
+		if (deathStatusChanged)
+			NDQS_Struct.lastTimer = currentTimer;
+		
+		narratorDeathQuotesTriggerValid = (deathStatusTracker && globalSoundMSTracker && vocalMSTracker && !NDQS_Struct.narratorDeathQuotesTriggerValid && timerTracker && currentAnimation);
+		NDQS_Struct.lastDeathStatus = currentDeathStatus;
+		NDQS_Struct.lastGlobalSoundMS = currentGlobalSoundMS;
+		NDQS_Struct.lastVocalMS = currentVocalMS;
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		narratorDeathQuotesTriggerValid = false;
+	}
+	
+	return narratorDeathQuotesTriggerValid;
+}
+
+void Narrator_Death_Quotes_Function(CharacterObject* player)
+{
+	bool narratorDeathQuotesTriggerValid = Narrator_Death_Quotes_Trigger_Valid(player);
+	
+	if (narratorDeathQuotesTriggerValid)
+	{
+		RunScript("ScheduleAlways(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"tonydeath_00\");");
+		NDQS_Struct.narratorDeathQuotesTriggerValid = true;
+	}
+	
+	if (!NDQS_Struct.lastDeathStatus)
+		NDQS_Struct.narratorDeathQuotesTriggerValid = false;
 }
 
 // Main Input Monitoring Thread
@@ -2575,41 +3513,66 @@ DWORD WINAPI InputThread(LPVOID lpParam)
         if (!p) 
             continue;
 		
-		/**std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
-		debugFile << "Player\n\n\tShooting_State : " << Vehicle_Shooting(p) << "\n\tWeapon_State : " << Get_Weapon_State(p) << "\n\n";
-		debugFile.close();**/
-        
         unsigned long now = GetTickCount();
+		Narrator_Death_Quotes_Function(p);
 		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
 		
 		if (!Scarface_EX_Trigger_Valid)
+		{
+			if (!CTMNVS_Struct.introductionDone)
+				CTMNVS_Struct.lastTimer = now;
+			
 			continue;
+		}
 		
-		if (now - g_LastDodgeTime >= g_Config.cooldown) 
+		// Global Trackers
+		int npcCount = 0, 
+			Shooting = Vehicle_Shooting(p), 
+			Seating_Position = Get_Vehicle_State(p), 
+			Weapon_State = Get_Weapon_State(p);
+			
+		std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
+		void** npcList = GetNPCList(&npcCount);
+		bool Character_Switching = Character_Switching_Trigger_Valid(p),
+			 currentMission = Get_Mission_Active(),
+			 combatTutorial = ((currentPackage == "MCP_ArmyTony") && !CTMNVS_Struct.missionComplete && currentMission),
+			 mansionEscape = ((currentPackage == "MCP_BlackSuitTony") && !UCS_Struct.MNIS_S01_4_Cops_Are_Here && currentMission), 
+			 Dodges_Trigger_Valid = (now - g_LastDodgeTime >= g_Config.cooldown),
+			 VehicleIdleStatesTriggerValid = (Seating_Position && !Shooting && !Weapon_State);
+		
+		if (Dodges_Trigger_Valid) 
         {
             CheckKeyboard(p, now);
             CheckController(p, now);
             CheckDirectInput(p, now);
         }
+			 
+		if (currentMission)
+			MCS_Struct.lastPackage = currentPackage;
 		
-		bool Character_Switching = Character_Switching_Trigger_Valid(p);
-		MCS_Struct.currentIteration = GlobalSoundGetCurrentMs();
+		if (mansionEscape)
+			Unused_Cutscenes_Function(p);
+	
+		if (combatTutorial)
+		{
+			Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(p);
+			Combat_Tutorial_Targets_Tracker(npcList, npcCount);
+		}
+		
+		if (MCS_Struct.narratorQuotesTriggered)
+			Narrator_Quotes_Reset_Input();
 		
 		if (Character_Switching)
 			Main_Character_Switching_Function(p);
 		
-		Health_Recovery_Function(p);
+		if (VehicleIdleStatesTriggerValid)
+			CheckVehicleAnimation(p);
 		
-		// CharacterObject::GetInstance() Tracker : Vehicle / Weapon Prop Damages \ Non-Playable / Playable Characters' Vehicles' Idles
-		int npcCount = 0, Shooting = Vehicle_Shooting(p), Seating_Position = Get_Vehicle_State(p), Weapon_State = Get_Weapon_State(p);
-		void** npcList = GetNPCList(&npcCount);
 		Damages_50_Calibers(npcList, npcCount);
 		CheckNPCVehicleDamage(npcList, npcCount);
 		CheckNPCVehicleAnimations(npcList, npcCount);
 		Vehicle_Character_Animation_Reset_Fix(npcList, npcCount);
-		
-		if (Seating_Position && !Shooting && !Weapon_State)
-			CheckVehicleAnimation(p); 		
+		Health_Recovery_Function(p);
     } 
 	
 	CleanupDirectInput();
@@ -2623,9 +3586,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
     if (reason == DLL_PROCESS_ATTACH) 
 	{
         DisableThreadLibraryCalls(hModule);
-		LoadConfig(); // Load Configuration
+		
+		// Load Configuration
+		LoadConfig();
 		HRS_Struct.Reset();
 		MCS_Struct.Reset();
+		CTMNVS_Struct.Reset();
+		UCS_Struct.Reset();
+		NDQS_Struct.Reset();
 
 		// Characters' States' Initialisation
 		for (int i = 0; i < MAX_NPCS; i++)       
@@ -2638,7 +3606,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 			g_NPC50CalStates[i].Reset();
 		
 		// Initialize Dodges & Evades system; First Person Camera system; Characters' Tracking System
-		bool dodgesOK = InitPlayerPointer() && InitPlayAnimation(), fpsOK = InitGetBonePosition() && InitCameraSetPosition(), npcOK = InitCVManager(), scriptOK  = Initialise_Run_Script();
+		bool dodgesOK = InitPlayerPointer() && InitPlayAnimation(),
+			 fpsOK = InitGetBonePosition() && InitCameraSetPosition(),
+			 npcOK = InitCVManager(), 
+			 scriptOK = Initialise_Run_Script();
 
 		// Install Camera Hook If 1st Person System Initialized Successfully
 		if (fpsOK)
@@ -2659,7 +3630,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		{
 			// Wait Maximum 1 Second
             WaitForSingleObject(g_InputThreadHandle, 1000);            
-            CloseHandle(g_InputThreadHandle);
+			CloseHandle(g_InputThreadHandle);
             g_InputThreadHandle = NULL;
         }
 	}
