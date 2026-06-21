@@ -41,6 +41,9 @@ This mod introduces high-quality gameplay improvements while maintaining a "vani
 
 ```
 23 - 15.12.2025
+- Restored Tony's unused phone call with Mama \ Jerry's cutscene ending dialogue \ unused phone call with Sosa.
+- Restored narrator's combat tutorial objective \ outfit / location switching \ extended front introduction \ death quotes.
+- Restored "The Fall" mission's unused cutscene.
 - Fixed transition bugs when exiting crouch-cover-shooting.
 - Added injured shooting/crouching animations for male characters (injury penalty).
 - Fixed rare animation breakage bugs.
