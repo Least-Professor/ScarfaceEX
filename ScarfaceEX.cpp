@@ -386,6 +386,24 @@ unsigned int Hash(char* input)
 	return v4 | 0x80000000;
 }
 
+// Current Locomotion Ring Type
+int Current_Locomotion_Ring_Type(CharacterObject* character)
+{
+	int currentLocomotionRingType = 0;
+	
+	__try
+	{
+		currentLocomotionRingType = *(int*)((uintptr_t)character + 0x1B0 + 0xB0);
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		currentLocomotionRingType = -1;
+	}
+	
+	return currentLocomotionRingType;
+}
+
 // Characters' Weapon State Detector
 int Get_Weapon_State(CharacterObject* npc)
 {
@@ -2189,7 +2207,7 @@ void Dodge(CharacterObject* player, const std::string& animName)
 	if (ActionMap || Swimming)
 		return;
 	
-	PlayAnimation(player, animName, 0);
+	PlayAnimation(player, animName, 67);
 }
 
 // 1st Person Camera Triggers for Player Set Conditions
@@ -2994,13 +3012,14 @@ void Vehicle_Character_Animation_Reset_Fix(void** pData, int count)
 void Health_Recovery_Function(CharacterObject* player)
 {
 	int currentHealth = GetCharacterHealth(player),
+		currentLocomotionRingType = Current_Locomotion_Ring_Type(player),
 		currentAnimation = Get_Animation_Request_ID(player), 
 		actionMap = *(int*)ADDR_VehicleState,
 		currentDrawnWeapon = Get_Current_Drawn_Weapon(player),
 		currentWeapon = Get_Current_Weapon(player), 
 		weapon_State = Get_Weapon_State(player);
 
-	bool refreshFunction = (actionMap != 0 || currentHealth <= 0 || weapon_State != 0 || currentAnimation || HRS_Struct.lastHealth == -1 || currentDrawnWeapon || currentWeapon);
+	bool refreshFunction = (actionMap != 0 || currentHealth <= 0 || weapon_State != 0 || currentAnimation || HRS_Struct.lastHealth == -1 || currentDrawnWeapon || currentWeapon || currentLocomotionRingType);
 	
 	if (refreshFunction)
 	{
