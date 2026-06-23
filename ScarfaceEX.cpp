@@ -3067,7 +3067,7 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 			  currentY = *(float*)((uintptr_t)p + 0x34 + 52), 
 			  currentZ = *(float*)((uintptr_t)p + 0x34 + 56);
 		
-		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f)), 
+		bool Main_Menu = ((currentX > -3500.0f && currentX < -3400.0f) && (currentY > 19.0f && currentY < 20.0f) && (currentZ > -1800.0f && currentZ < -1700.0f)),
 			 currentNIS = Is_NIS_Active(), 
 			 currentGamePaused = Is_Game_Paused_HUD(), 
 			 currentScreenFXTransition = Get_Screen_Effects_Transition_Blacked_Out(), 
