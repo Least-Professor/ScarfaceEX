@@ -41,7 +41,7 @@ std::mt19937& Get_Random_Seed()
 // Random Values Generation
 unsigned long Random_Quote_Delays()
 {
-	unsigned long randomQuoteDelays = std::uniform_int_distribution<unsigned long>(3333UL, 7777UL)(Get_Random_Seed());
+	unsigned long randomQuoteDelays = std::uniform_int_distribution<unsigned long>(5555UL, 7777UL)(Get_Random_Seed());
 	
 	return randomQuoteDelays;
 }
