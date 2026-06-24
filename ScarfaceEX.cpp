@@ -41,7 +41,7 @@ std::mt19937& Get_Random_Seed()
 // Random Values Generation
 unsigned long Random_Quote_Delays()
 {
-	unsigned long randomQuoteDelays = std::uniform_int_distribution<unsigned long>(1000UL, 10000UL)(Get_Random_Seed());
+	unsigned long randomQuoteDelays = std::uniform_int_distribution<unsigned long>(3333UL, 7777UL)(Get_Random_Seed());
 	
 	return randomQuoteDelays;
 }
@@ -113,7 +113,8 @@ struct Combat_Tutorial_Missing_Narrator_Voices_Tracker_Structure
 		 missionComplete, 
 		 missionStarted, 
 		 targetsPresent, 
-		 introductionDone;
+		 introductionDone,
+		 weaponYetToPickUp;
 	
 	void Reset()
 	{
@@ -128,6 +129,7 @@ struct Combat_Tutorial_Missing_Narrator_Voices_Tracker_Structure
 		missionStarted = false;
 		targetsPresent = false;
 		introductionDone = false;
+		weaponYetToPickUp = false;
 	}
 }
 CTMNVS_Struct;
@@ -3224,7 +3226,7 @@ bool Combat_Tutorial_Weapon_Pickup_Valid(CharacterObject* player)
 		float currentX = *(float*)((uintptr_t)player + 0x34 + 48), 
 			  currentZ = *(float*)((uintptr_t)player + 0x34 + 56);
 		
-		combatTutorialWeaponPickupValid = (currentX >= -9367.539f) && (currentZ <= -8076.217f);
+		combatTutorialWeaponPickupValid = (currentX >= -9370.0f) && (currentX <= -9360.0f) && (currentZ >= -8080.0f) && (currentZ <= -8070.0f);
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
@@ -3241,16 +3243,24 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 	bool currentWeapon = (Get_Current_Weapon(player) > 0), 
 		 playerVehicleActive = IsInVehicle(), 
 		 globalSoundActive = (GlobalSoundGetCurrentMs() != -1), 
-		 weaponYetToPickUp = (Combat_Tutorial_Weapon_Pickup_Valid(player) && !CTMNVS_Struct.weaponPickedUp), 
+		 weaponYetToPickUp = (Combat_Tutorial_Weapon_Pickup_Valid(player) && !CTMNVS_Struct.weaponPickedUp && !CTMNVS_Struct.weaponYetToPickUp), 
 		 currentWallCover = Wall_Cover_Available(player), 
 		 currentRageMode = Rage_Mode_Active(player), 
 		 currentVocalMS = (Current_Voice_MS(player) != -1),		 
 		 aimingWeapon = (Gun_Up_State(player) && currentWeapon),
 		 weaponPickedUpAgain = (currentDrawnWeapon != CTMNVS_Struct.lastDrawnWeapon),
 		 ak47 = (weaponPickedUpAgain && CTMNVS_Struct.weaponPickedUp && currentDrawnWeapon && CTMNVS_Struct.lastDrawnWeapon && !CTMNVS_Struct.weaponChanged),
-		 missionStarted = !CTMNVS_Struct.missionStarted;
+		 missionStarted = !CTMNVS_Struct.missionStarted,
+		 weaponYetToBePickedUp = CTMNVS_Struct.weaponYetToPickUp && !CTMNVS_Struct.weaponPickedUp;
 	
 	unsigned long currentTimer = GetTickCount();
+	
+	if (weaponYetToPickUp)
+	{
+		CTMNVS_Struct.weaponYetToPickUp = true;
+		CTMNVS_Struct.lastTimer = currentTimer;
+		return;
+	}
 	
 	if (ak47)
 	{
@@ -3269,11 +3279,11 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 	CTMNVS_Struct.lastDrawnWeapon = currentDrawnWeapon;
 	bool triggerValid = (!CTMNVS_Struct.missionComplete && CTMNVS_Struct.missionStarted && !currentRageMode && !globalSoundActive),
 		 timerValid = (CTMNVS_Struct.introductionDone || aimingWeapon),
-		 introductionTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > 5555UL),
+		 introductionTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > 5731UL),
 		 playTimeTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > CTMNVS_Struct.quoteDelay),
 		 triggerNarratorsQuotes = timerValid ? (triggerValid && playTimeTimer) : (triggerValid && introductionTimer),
 		 missionComplete = (!currentRageMode && CTMNVS_Struct.lastRageMode && !CTMNVS_Struct.missionComplete), 
-		 weaponPickedUp = (currentWeapon && !CTMNVS_Struct.weaponPickedUp);
+		 weaponPickedUp = (currentWeapon && !CTMNVS_Struct.weaponPickedUp && currentDrawnWeapon);
 	
 	if (missionComplete)
 	{
@@ -3330,7 +3340,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			}
 		}
 		
-		if (weaponYetToPickUp)
+		if (weaponYetToBePickedUp)
 		{
 			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_06\");");
 			CTMNVS_Struct.lastTimer = currentTimer;
@@ -3517,6 +3527,27 @@ void Narrator_Death_Quotes_Function(CharacterObject* player)
 		NDQS_Struct.narratorDeathQuotesTriggerValid = false;
 }
 
+void Reset_Mission_Constraints_Function()
+{
+	bool Mission_Inactive = false;
+	
+	__try
+	{
+		Mission_Inactive = !Get_Mission_Active();
+		
+		if (Mission_Inactive)
+		{
+			CTMNVS_Struct.Reset();
+			UCS_Struct.Reset();	
+		}	
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		return;
+	}
+}
+
 // Main Input Monitoring Thread
 DWORD WINAPI InputThread(LPVOID lpParam) 
 {
@@ -3532,6 +3563,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
             continue;
 		
         unsigned long now = GetTickCount();
+		Reset_Mission_Constraints_Function();
 		Narrator_Death_Quotes_Function(p);
 		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
 		
