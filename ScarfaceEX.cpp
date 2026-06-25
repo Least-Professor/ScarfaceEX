@@ -3173,7 +3173,7 @@ void Main_Character_Switching_Function()
 		
 		else
 		{
-			RunScript("Schedule(\"1\", \"SetBlockingActionMap\", \"1\"); Schedule(\"2\", \"SoundFadeinMix\", \"duck_cinematics\");");
+			RunScript("Schedule(\"1\", \"SetBlockingActionMap\", \"1\"); Schedule(\"2\", \"SoundFadeinMix\", \"duck_cinematics\"); Schedule(\"3\", \"HUDSetElementEnabled\", \"EHE_INVENTORY_SELECTION_HUD\", \"0\");");
 			MCS_Struct.narratorQuotesTriggered = true;
 			MCS_Struct.lastTimer = GetTickCount();
 			// debugFile << "Narrator Quotes Triggered: "<< MCS_Struct.narratorQuotesTriggered <<"\n";
@@ -3244,7 +3244,7 @@ void Narrator_Quotes_Reset_Input()
 		 
 	if (globalSoundMSTracker)
 	{
-		RunScript("ScheduleAlways(\"1\", \"SoundFadeoutMix\", \"duck_cinematics\"); ScheduleAlways(\"23\", \"SetBlockingActionMap\", \"0\");");
+		RunScript("ScheduleAlways(\"1\", \"SoundFadeoutMix\", \"duck_cinematics\"); ScheduleAlways(\"2\", \"SetBlockingActionMap\", \"0\"); ScheduleAlways(\"3\", \"HUDSetElementEnabled\", \"EHE_INVENTORY_SELECTION_HUD\", \"1\");");
 		MCS_Struct.narratorQuotesTriggered = false;
 		// debugFile << "Input Reset: "<< (!MCS_Struct.narratorQuotesTriggered) <<"\n";
 	}
