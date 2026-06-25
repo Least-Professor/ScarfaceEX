@@ -17,7 +17,7 @@
 #define ADDR_VehicleState 0x007BC51C
 #define CONFIG_FILE "ScarfaceEX_Configuration.ini"
 #define README_FILE "ScarfaceEX_Instructions.txt"
-std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+//std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
 
 typedef void* CharacterObject;
 typedef int (__cdecl *Global_Sound_Get_Current_Function)();
