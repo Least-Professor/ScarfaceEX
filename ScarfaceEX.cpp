@@ -3601,7 +3601,7 @@ void Characters_Changing_Weapons_Function(void** pData, int count)
 			
 		bool triggerInvalid0 = (NPC_IsInBoat(characters) || NPC_IsInCar(characters) || Gun_Up_State(characters) || Crouch_State(characters)),
 			 triggerInvalid1 = (!currentWeapon || Dead_Body_Tracker(characters) || (currentLocomotionRingType > 1) || Get_Weapon_State(characters)),
-			 refreshFunction = (triggerInvalid0 || triggerInvalid1 || Character_Is_Swimming(characters) || Get_Animation_Request_ID(characters)),
+			 refreshFunction = (triggerInvalid0 || triggerInvalid1 || Get_Animation_Request_ID(characters)),
 			 weaponChanged = ((currentWeapon != CHWS_Struct[i].lastWeapon) && (currentWeapon != 0));
 			 
 		if (refreshFunction)
