@@ -25,6 +25,20 @@ typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
 typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
 typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
 
+// Character Switching Weapons Tracker
+static const int MAX_CHARACTERS = 64;
+
+struct Characters_Changing_Weapons_Structure
+{
+	int lastWeapon;
+	
+	void Reset()
+	{
+		lastWeapon = 0;
+	}
+}
+CHWS_Struct[MAX_CHARACTERS];
+
 // Random Values' Start-Up Seed Generation
 std::mt19937& Get_Random_Seed() 
 {
@@ -284,7 +298,8 @@ struct Config
 				landVehicleDamagePassenger, 
 				waterVehicleDamagePassenger, 
 				Damage_50_Calibers, 
-				HealthRecovery;
+				HealthRecovery,
+				SwitchingWeapons;
     
 	// Press Mode
 	int pressMode;
@@ -994,6 +1009,7 @@ void LoadConfig()
 	g_Config.leftPeekShootAnimation = "Left_Peek_Shoot";
 	g_Config.rightPeekShootAnimation = "Right_Peek_Shoot";
 	g_Config.HealthRecovery = "Health_Recovery";
+	g_Config.SwitchingWeapons = "Switching_Weapons";
 	
 	// Vehicles
 	g_Config.waterVehicleDriver = "Reset_Boat_Steer_Generic";
@@ -1184,6 +1200,7 @@ void LoadConfig()
 		outFile << "Back_Animation=Proximity_Weapon_Attack\n";
 		outFile << "Left_Peek_Shoot_Animation=Left_Peek_Shoot\n";
         outFile << "Right_Peek_Shoot_Animation=Right_Peek_Shoot\n";
+		outFile << "Switching_Weapons=Switching_Weapons\n";
 		outFile << "Health_Recovery=Health_Recovery\n\n";
 		outFile << "[Behavior]\n\n";
 		outFile << "Press_Mode=2\n";
@@ -1323,6 +1340,9 @@ void LoadConfig()
             
 			if (key == "Health_Recovery" && !value.empty()) 
 				g_Config.HealthRecovery = value; 
+            
+			if (key == "Switching_Weapons" && !value.empty()) 
+				g_Config.SwitchingWeapons = value; 
         }
 		
 		if (section == "Behavior") 
@@ -1763,6 +1783,21 @@ int Damage_Weapon(CharacterObject* character)
     {
         int damageWeapon = *(int*)((uintptr_t)character + 0x17C);
         return damageWeapon;
+    }
+    
+	__except(EXCEPTION_EXECUTE_HANDLER) 
+	{ 
+		return 0; 
+	}
+} 
+
+// Crouch State Detector
+int Crouch_State(CharacterObject* character)
+{
+	__try
+    {
+        int crouchState = *(int*)((uintptr_t)character + 0x2A0 + 0x4);
+        return crouchState;
     }
     
 	__except(EXCEPTION_EXECUTE_HANDLER) 
@@ -3548,6 +3583,40 @@ void Reset_Mission_Constraints_Function()
 	}
 }
 
+// Weapon Switching Animations
+void Characters_Changing_Weapons_Function(void** pData, int count)
+{
+	if (!pData || count <= 0)
+        return;
+	
+	for (int i = 0; i < count && i < MAX_CHARACTERS; i++)
+    {
+        CharacterObject* characters = (CharacterObject*)pData[i];
+
+        if (!characters)
+            continue;
+		
+		int currentWeapon = Get_Current_Drawn_Weapon(characters),
+			currentLocomotionRingType = Current_Locomotion_Ring_Type(characters);
+			
+		bool triggerInvalid0 = (NPC_IsInBoat(characters) || NPC_IsInCar(characters) || Gun_Up_State(characters) || Crouch_State(characters)),
+			 triggerInvalid1 = (!currentWeapon || Dead_Body_Tracker(characters) || (currentLocomotionRingType > 1) || Get_Weapon_State(characters)),
+			 refreshFunction = (triggerInvalid0 || triggerInvalid1 || Character_Is_Swimming(characters) || Get_Animation_Request_ID(characters)),
+			 weaponChanged = ((currentWeapon != CHWS_Struct[i].lastWeapon) && (currentWeapon != 0));
+			 
+		if (refreshFunction)
+		{
+			CHWS_Struct[i].lastWeapon = currentWeapon;
+			continue;
+		}
+		
+		if (weaponChanged)
+			PlayAnimation(characters, g_Config.SwitchingWeapons, 67);
+		
+		CHWS_Struct[i].lastWeapon = currentWeapon;
+	}
+}
+
 // Main Input Monitoring Thread
 DWORD WINAPI InputThread(LPVOID lpParam) 
 {
@@ -3571,6 +3640,9 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 		{
 			if (!CTMNVS_Struct.introductionDone)
 				CTMNVS_Struct.lastTimer = now;
+			
+			if (MCS_Struct.narratorQuotesTriggered)
+				MCS_Struct.lastTimer = now;
 			
 			continue;
 		}
@@ -3622,6 +3694,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 		CheckNPCVehicleDamage(npcList, npcCount);
 		CheckNPCVehicleAnimations(npcList, npcCount);
 		Vehicle_Character_Animation_Reset_Fix(npcList, npcCount);
+		Characters_Changing_Weapons_Function(npcList, npcCount);
 		Health_Recovery_Function(p);
     } 
 	
@@ -3654,6 +3727,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		
 		for (int i = 0; i < MAX_NPC_50CAL; i++)   
 			g_NPC50CalStates[i].Reset();
+		
+		for (int i = 0; i < MAX_CHARACTERS; i++)
+			CHWS_Struct[i].Reset();
 		
 		// Initialize Dodges & Evades system; First Person Camera system; Characters' Tracking System
 		bool dodgesOK = InitPlayerPointer() && InitPlayAnimation(),
