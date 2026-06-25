@@ -3148,7 +3148,7 @@ bool Character_Switching_Trigger_Valid(CharacterObject* p)
 }
 
 // Main Character Switching Detection
-void Main_Character_Switching_Function(CharacterObject* player)
+void Main_Character_Switching_Function()
 {	
 	if (MCS_Struct.lastPackage == "")
 	{
@@ -3682,7 +3682,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			Narrator_Quotes_Reset_Input();
 		
 		if (Character_Switching)
-			Main_Character_Switching_Function(p);
+			Main_Character_Switching_Function();
 		
 		if (VehicleIdleStatesTriggerValid)
 			CheckVehicleAnimation(p);
