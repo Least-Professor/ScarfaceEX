@@ -17,10 +17,11 @@
 #define ADDR_VehicleState 0x007BC51C
 #define CONFIG_FILE "ScarfaceEX_Configuration.ini"
 #define README_FILE "ScarfaceEX_Instructions.txt"
-// std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
 
 typedef void* CharacterObject;
 typedef int (__cdecl *Global_Sound_Get_Current_Function)();
+typedef int (__cdecl *DB_Get_Reputation_Level_Function)();
 typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
 typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
 typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
@@ -557,6 +558,7 @@ CVM_Get_Main_Character_Package_Function CVM_Get_Main_Character_Package_Pointer =
 Run_Script_Function Run_Script_Pointer = NULL;
 uintptr_t Run_Script_Address = 0;
 Global_Sound_Get_Current_Function Global_Sound_Get_Current_Pointer = (Global_Sound_Get_Current_Function)0x0049a420;
+DB_Get_Reputation_Level_Function DB_Get_Reputation_Level_Pointer = (DB_Get_Reputation_Level_Function)0x00433cb0;
 
 // Keyboard \ Mouse \ Microsoft Xinput Controller \ Direct-Input Controller States Tracker; Direct-Input Flag
 bool g_KeyboardState[6] = { false, false, false, false, false, false },
@@ -577,6 +579,23 @@ typedef void (__thiscall *SetPositionFunc)(void* camera, Vector* pos);
 typedef Vector* (__thiscall *GetBonePositionFunc)(CharacterObject* character, int boneId);
 SetPositionFunc g_OriginalSetPosition = NULL;
 GetBonePositionFunc g_GetBonePosition = NULL;
+
+// Reputation Level Tracker
+int DB_Get_Reputation_Level_Wrapper()
+{
+	if (!DB_Get_Reputation_Level_Pointer)
+		return -1;
+	
+	__try
+	{
+		return DB_Get_Reputation_Level_Pointer();
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		return -1;
+	}
+}
 
 // Global_Sound_Tracker
 int GlobalSoundGetCurrentMs()
@@ -3158,10 +3177,6 @@ void Main_Character_Switching_Function()
 	}
 	
 	std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
-	
-	if (currentPackage == "MCP_ArmyTony")
-		return;
-		
     bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage),
 		 Island_Package = (currentPackage == "MCP_HawaiianTony" || currentPackage == "MCP_HawaiianShadesTony" || currentPackage == "MCP_SandyShadesTony" || currentPackage == "MCP_SandyTony"),
 		 Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer");
@@ -3651,7 +3666,8 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 		int npcCount = 0, 
 			Shooting = Vehicle_Shooting(p), 
 			Seating_Position = Get_Vehicle_State(p), 
-			Weapon_State = Get_Weapon_State(p);
+			Weapon_State = Get_Weapon_State(p),
+			currentReputationLevel = DB_Get_Reputation_Level_Wrapper();
 			
 		std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
 		void** npcList = GetNPCList(&npcCount);
@@ -3660,7 +3676,14 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			 combatTutorial = ((currentPackage == "MCP_ArmyTony") && !CTMNVS_Struct.missionComplete && currentMission),
 			 mansionEscape = ((currentPackage == "MCP_BlackSuitTony") && !UCS_Struct.MNIS_S01_4_Cops_Are_Here && currentMission), 
 			 Dodges_Trigger_Valid = (now - g_LastDodgeTime >= g_Config.cooldown),
-			 VehicleIdleStatesTriggerValid = (Seating_Position && !Shooting && !Weapon_State);
+			 VehicleIdleStatesTriggerValid = (Seating_Position && !Shooting && !Weapon_State),
+			 reputationLevelInsufficient = ((currentReputationLevel < 1) && (currentPackage != "MCP_Driver")),
+			 assassinKillingExBoyFriend = ((IsInVehicle() || Get_Current_Drawn_Weapon(p) || Get_Current_Weapon(p)) && (currentPackage == "MCP_Assassin")),
+			 characterSwitchingInvalid0 = (Gun_Up_State(p) || Crouch_State(p) || Current_Locomotion_Ring_Type(p) || Get_Weapon_State(p) || Dead_Body_Tracker(p)),
+			 characterSwitchingInvalid = (characterSwitchingInvalid0 || assassinKillingExBoyFriend || reputationLevelInsufficient || Get_Animation_Request_ID(p));
+			 
+		if (characterSwitchingInvalid)
+			MCS_Struct.lastPackage = currentPackage;
 		
 		if (Dodges_Trigger_Valid) 
         {
