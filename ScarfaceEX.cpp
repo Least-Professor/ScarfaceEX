@@ -3668,9 +3668,6 @@ DWORD WINAPI InputThread(LPVOID lpParam)
             CheckController(p, now);
             CheckDirectInput(p, now);
         }
-			 
-		if (currentMission)
-			MCS_Struct.lastPackage = currentPackage;
 		
 		if (mansionEscape)
 			Unused_Cutscenes_Function(p);
