@@ -3680,7 +3680,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			 reputationLevelInsufficient = ((currentReputationLevel < 1) && (currentPackage != "MCP_Driver")),
 			 assassinKillingExBoyFriend = ((IsInVehicle() || Get_Current_Drawn_Weapon(p) || Get_Current_Weapon(p)) && (currentPackage == "MCP_Assassin")),
 			 characterSwitchingInvalid0 = (Gun_Up_State(p) || Crouch_State(p) || Current_Locomotion_Ring_Type(p) || Get_Weapon_State(p) || Dead_Body_Tracker(p)),
-			 characterSwitchingInvalid = (characterSwitchingInvalid0 || assassinKillingExBoyFriend || reputationLevelInsufficient || Get_Animation_Request_ID(p));
+			 characterSwitchingInvalid = (characterSwitchingInvalid0 || assassinKillingExBoyFriend || reputationLevelInsufficient);
 			 
 		if (characterSwitchingInvalid)
 			MCS_Struct.lastPackage = currentPackage;
