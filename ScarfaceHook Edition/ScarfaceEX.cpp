@@ -17,7 +17,7 @@
 #define ADDR_VehicleState 0x007BC51C
 #define CONFIG_FILE "ScarfaceEX_Configuration.ini"
 #define README_FILE "ScarfaceEX_Instructions.txt"
-//std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+// std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
 
 typedef void* CharacterObject;
 typedef int (__cdecl *Global_Sound_Get_Current_Function)();
@@ -25,6 +25,20 @@ typedef int (__cdecl *DB_Get_Reputation_Level_Function)();
 typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
 typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
 typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
+
+// Characters Speaking Inside Vehicles Tracker
+static const int MAX_SPEAKERS = 64;
+
+struct Characters_Speaking_Inside_Vehicles_Structure
+{
+	bool lastVocalMS;
+		 
+	void Reset()
+	{
+		lastVocalMS = false;
+	}
+}
+CSIVS_Struct[MAX_SPEAKERS];
 
 // Character Switching Weapons Tracker
 static const int MAX_CHARACTERS = 64;
@@ -239,7 +253,12 @@ struct Config
 				waterVehicleDamagePassenger, 
 				Damage_50_Calibers, 
 				HealthRecovery,
-				SwitchingWeapons;
+				SwitchingWeapons,
+				landVehicleDriverTalking,
+				landVehicleDriverReverseTalking,
+				landVehiclePassengerTalking,
+				waterVehicleDriverTalking,
+				waterVehiclePassengerTalking;
     
 	// Press Mode
 	int pressMode;
@@ -409,13 +428,17 @@ int Get_50_Calibers(CharacterObject* npc)
 // Vehicle Damage Animation Tracking
 struct DamageAnimState
 {
-    int lastHealth;  
-    bool animPlayed; 
+    unsigned long lastTimer;
+	int lastHealth;  
+    bool animPlayed,
+		 damageTaken; 
 
     void Reset()
     {
-        lastHealth = -1; 
+        lastTimer = GetTickCount();
+		lastHealth = -1; 
         animPlayed = false;
+		damageTaken = false;
     }
 };
 
@@ -688,7 +711,8 @@ WORD ParseButton(const std::string& name)
 }
 
 // Parse key name to Virtual Key Code
-int ParseKey(const std::string& name) {
+int ParseKey(const std::string& name) 
+{
     
 	// Single Character Keys : A - Z \ 0-9
     if (name.length() == 1) 
@@ -976,6 +1000,11 @@ void LoadConfig()
 	g_Config.landVehicleDamageDriverReverse = "Driver_Land_Vehicle_Damage_Reverse";
 	g_Config.landVehicleDamagePassenger = "Passenger_Land_Vehicle_Damage";
 	g_Config.Damage_50_Calibers = "Damage_50_Calibers";
+	g_Config.landVehicleDriverTalking = "Land_Vehicles_Driver_Talking";
+	g_Config.landVehicleDriverReverseTalking = "Land_Vehicles_Driver_Reverse_Talking";
+	g_Config.landVehiclePassengerTalking = "Land_Vehicles_Passenger_Talking";
+	g_Config.waterVehicleDriverTalking = "Water_Vehicles_Driver_Talking";
+	g_Config.waterVehiclePassengerTalking = "Water_Vehicles_Passenger_Talking";
     
     g_Config.pressMode = 2;
     g_Config.pressWindow = 210;
@@ -1118,6 +1147,11 @@ void LoadConfig()
 		outFile << "Press_Window=210\n";
 		outFile << "Cooldown=753\n\n";
 		outFile << "[Vehicles]\n\n";
+		outFile << "Land_Vehicles_Driver_Talking=Land_Vehicles_Driver_Talking\n";
+		outFile << "Land_Vehicles_Driver_Reverse_Talking=Land_Vehicles_Driver_Reverse_Talking\n";
+		outFile << "Land_Vehicles_Passenger_Talking=Land_Vehicles_Passenger_Talking\n";
+		outFile << "Water_Vehicles_Driver_Talking=Water_Vehicles_Driver_Talking\n";
+		outFile << "Water_Vehicles_Passenger_Talking=Water_Vehicles_Passenger_Talking\n";
 		outFile << "Water_Vehicle_Passenger=Reset_Pass_Sit\n";
 		outFile << "Water_Vehicle_Driver=Reset_Boat_Steer_Generic\n";
 		outFile << "Land_Vehicle_Driver=Reset_Steer_Forward\n";
@@ -1856,24 +1890,6 @@ int Get_Vehicle_State(CharacterObject* npc)
 	}
 }
 
-// Character's Swimming State Detector
-bool Character_Is_Swimming(CharacterObject* character)
-{
-	bool isCharacterSwimming = false;
-	
-	__try
-	{
-		isCharacterSwimming = *(int*)((uintptr_t)character + 0x2DC + 0x9);
-	}
-	
-	__except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		isCharacterSwimming = false;
-	}
-	
-	return isCharacterSwimming;
-}
-
 // Characters' Vehicle Types' Detector
 bool NPC_IsInCar(CharacterObject* npc)
 {
@@ -2063,10 +2079,9 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
 // 'CharacterObject :: RequestAnimation()' Triggers Under Appropriate Conditions
 void Dodge(CharacterObject* player, const std::string& animName) 
 {
-    bool ActionMap = IsInVehicle(),
-		 Swimming = Character_Is_Swimming(player);
+    bool ActionMap = IsInVehicle();
 	
-	if (ActionMap || Swimming)
+	if (ActionMap)
 		return;
 	
 	PlayAnimation(player, animName, 67);
@@ -2497,9 +2512,12 @@ void CheckNPCVehicleAnimations(void** pData, int count)
         int seatingPosition = Get_Vehicle_State(npc), 
 			Weapon_State = Get_Weapon_State(npc), 
 			Reversing = Land_Vehicle_Reverse_Driving(npc), 
-			Shooting = Vehicle_Shooting(npc);
+			Shooting = Vehicle_Shooting(npc),
+			currentVocalMS = (Current_Voice_MS(npc) != -1);
+			
+		bool refreshFunction = (seatingPosition != 1 || Weapon_State || Shooting || currentVocalMS || g_NPCDamageStates[i].damageTaken);
 
-        if (seatingPosition != 1 || Weapon_State || Shooting)
+        if (refreshFunction)
         {
             g_NPCStates[i].Reset();
             continue;
@@ -2513,7 +2531,7 @@ void CheckNPCVehicleAnimations(void** pData, int count)
 				  dx = curX - state.lastX, 
 				  dz = curZ - state.lastZ;
             
-			bool isMoving = (dx * dx + dz * dz) > 0.01f;
+			bool isMoving = ((dx * dx + dz * dz) > 0.01f);
             state.lastX = curX;
             state.lastZ = curZ;
 
@@ -2582,6 +2600,9 @@ void ProcessDamageAnim(CharacterObject* character, DamageAnimState& state, bool 
 
     if (!state.animPlayed && healthDropped && stillAlive)
     {		
+		state.damageTaken = true;
+		state.lastTimer = GetTickCount();
+		
 		if (Seat)
 		{
 			if (!isBoat && Reversing)
@@ -3343,6 +3364,75 @@ void Characters_Changing_Weapons_Function(void** pData, int count)
 	}
 }
 
+void Characters_Speaking_Inside_Vehicles_Function(void** pData, int count)
+{
+	if (!pData || count <= 0)
+        return;
+	
+	unsigned long now = GetTickCount();
+	
+	for (int i = 0; i < count && i < MAX_SPEAKERS; i++)
+    {
+        CharacterObject* characters = (CharacterObject*)pData[i];
+
+        if (!characters)
+            continue;
+	
+		bool Inside_Water_Vehicle = NPC_IsInBoat(characters), 
+			 Inside_Land_Vehicle = NPC_IsInCar(characters), 
+			 Inside_Vehicle = (Inside_Water_Vehicle || Inside_Land_Vehicle);
+		
+		if (!Inside_Vehicle)
+			continue;
+		
+		bool landVehicleDriverReversing = Land_Vehicle_Reverse_Driving(characters), 
+			 driver = Get_Vehicle_State(characters), 
+			 passenger = Get_Vehicle_Passenger_State(characters),
+			 currentVocalMS = (Current_Voice_MS(characters) == -1),
+			 timerValid = g_NPCDamageStates[i].damageTaken ? ((now - g_NPCDamageStates[i].lastTimer) > 2753UL) : true;
+			 
+		if (timerValid)
+			g_NPCDamageStates[i].damageTaken = false;
+		
+		bool triggerValid = (CSIVS_Struct[i].lastVocalMS && !currentVocalMS && timerValid);
+			 
+		if (triggerValid)
+		{
+			if (driver)
+			{
+				if (Inside_Land_Vehicle)
+				{
+					const std::string& anim = landVehicleDriverReversing ? g_Config.landVehicleDriverReverseTalking : g_Config.landVehicleDriverTalking;
+					PlayAnimation(characters, anim, 0);
+				}
+				
+				if (Inside_Water_Vehicle)
+				{
+					const std::string& anim = g_Config.waterVehicleDriverTalking;
+					PlayAnimation(characters, anim, 0);
+				}
+			}
+			
+			if (passenger)
+			{
+				if (Inside_Land_Vehicle)
+				{
+					const std::string& anim = g_Config.landVehiclePassengerTalking;
+					PlayAnimation(characters, anim, 0);
+				}
+				
+				if (Inside_Water_Vehicle)
+				{
+					const std::string& anim = g_Config.waterVehiclePassengerTalking;
+					PlayAnimation(characters, anim, 0);
+				}
+			}
+		}
+		
+		CSIVS_Struct[i].lastVocalMS = currentVocalMS;
+	}
+}
+
 // Main Input Monitoring Thread
 DWORD WINAPI InputThread(LPVOID lpParam) 
 {
@@ -3426,6 +3516,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 		CheckNPCVehicleAnimations(npcList, npcCount);
 		Vehicle_Character_Animation_Reset_Fix(npcList, npcCount);
 		Characters_Changing_Weapons_Function(npcList, npcCount);
+		Characters_Speaking_Inside_Vehicles_Function(npcList, npcCount);
 		Health_Recovery_Function(p);
     } 
 	
@@ -3461,6 +3552,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		
 		for (int i = 0; i < MAX_CHARACTERS; i++)
 			CHWS_Struct[i].Reset();
+		
+		for (int i = 0; i < MAX_SPEAKERS; i++)
+			CSIVS_Struct[i].Reset();
 		
 		// Initialize Dodges & Evades system; First Person Camera system; Characters' Tracking System
 		bool dodgesOK = InitPlayerPointer() && InitPlayAnimation(),
