@@ -2265,8 +2265,8 @@ void Dodge(CharacterObject* player, const std::string& animName)
 		 phoneCallsTriggerValid = (!DPCBS_Struct.blockedFlag && !MCS_Struct.narratorQuotesTriggered && !Get_Mission_Active() && (Current_Voice_MS(player) == -1)),
 		 phoneCallsTriggerValid0 = ((Get_Animation_Request_ID(player) == 0) && (GlobalSoundGetCurrentMs() == -1) && phoneCallsTriggerValid),
 		 phoneCallsTriggerValid1 = (!MGM_Get_Visibility_Points_Wrapper() && !MGM_Visibility_Is_Fucked() && !MGM_Visibility_Is_Red() && phoneCallsTriggerValid0),
-		 CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid1),
-		 GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid1); 
+		 CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid1 && (DB_Get_Reputation_Level_Wrapper() >= 2)),
+		 GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid1 && (DB_Get_Reputation_Level_Wrapper() >= 2)); 
 	
 	if (ActionMap)
 		return;
