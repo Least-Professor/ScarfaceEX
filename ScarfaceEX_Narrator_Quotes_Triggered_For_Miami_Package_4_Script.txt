@@ -1,0 +1,3 @@
+Schedule("777", "GlobalSoundPlay", "se_narrator", "shoutout_03");
+
+return;

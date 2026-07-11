@@ -1,0 +1,588 @@
+$currentCleanCash = (stxogkpfppp() > 1000); 
+$currentCopHeat = (stxadlbimkj() > 1000);
+$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+$currentHUDGameIsPaused = !HUD_IsGamePaused();
+$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+$currentTeleporting = !IsTeleporting();
+$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+$currentNIS = !NISIsPlaying();
+$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+$isSatellitePhoneOwned = IsSatPhoneOwned();
+$isSafeToActivateDialogue = IsSafeToActivateDialog();
+
+$startingTriggerValid = ($currentAnimationRequestID && $currentCleanCash && $currentCopHeat && $currentGlobalSoundMS && $currentNIS && $currentVocalMS);
+$startingTriggerValid0 = ($startingTriggerValid && $currentMainCharacterKilledOrFlaggedOnForKilled && $currentMainCharacterPackageLoaded);
+$startingTriggerValid1 = ($startingTriggerValid0 && $currentTeleporting && $currentVisibilityPoints && $isSafeToActivateDialogue && $currentHUDGameIsPaused);
+$startingTriggerValid2 = ($startingTriggerValid1 && $isSatellitePhoneOwned && $currentMissionScreen);
+
+$triggerValid = ($currentAnimationRequestID && $currentCleanCash && $currentCopHeat && $currentNIS && $currentVocalMS && $currentMainCharacterPackageLoaded);
+$triggerValid0 = ($triggerValid && $currentMainCharacterKilledOrFlaggedOnForKilled && $currentTeleporting && $currentVisibilityPoints && $isSatellitePhoneOwned);
+$triggerValid1 = ($triggerValid0 && $isSatellitePhoneOwned && $currentHUDGameIsPaused && $currentMissionScreen && $isSafeToActivateDialogue);
+
+function Reset_Locomotion_Type_Name()
+{
+	"MainCharacter".isInvincible = 0;
+	"MainCharacter".Schedule("1", "stxopmddkok");
+	
+	ScheduleAlways("2", "HUD_SetGlobalSafeToActivate", "1");
+	
+	return;
+}
+
+function Reset_Locomotion_Type()
+{
+	"MainCharacter".isInvincible = 0;
+	"MainCharacter".Schedule("1", "stxopmddkok");
+	
+	ScheduleAlways("2", "DBChangeCleanCash", "-1000"); 
+	ScheduleAlways("3", "DBChangeCopHeat", "-1000");
+	ScheduleAlways("4", "HUD_SetGlobalSafeToActivate", "1");
+	
+	return;
+}
+
+function miami_cop_01_donutbribedone_00_6()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribedone_00", "Reset_Locomotion_Type");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function cop_heat_pay_down_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "cop_heat_pay_down_00", "miami_cop_01_donutbribedone_00_6");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_02_donutbribedone_00_5()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribedone_00", "cop_heat_pay_down_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function accept_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "accept_00", "miami_cop_02_donutbribedone_00_5");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_01_donutbribe_00_4()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "accept_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function convince_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "convince_00", "miami_cop_01_donutbribe_00_4");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_02_donutbribe_00_3()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribe_00", "convince_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function decline_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "decline_00", "miami_cop_02_donutbribe_00_3");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_01_donutbribe_00_2()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "decline_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function buy_off_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_00", "miami_cop_01_donutbribe_00_2");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_02_donutbribe_00_1()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribe_00", "buy_off_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function buy_off_approach_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_approach_00", "miami_cop_02_donutbribe_00_1");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_01_donutbribe_00_0()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "buy_off_approach_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function greet_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "greet_00", "miami_cop_01_donutbribe_00_0");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_02_donutbribe_00_()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribe_00", "greet_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function answerphone_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "answerphone_00", "miami_cop_02_donutbribe_00_");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+function miami_cop_01_donutbribe_00()
+{
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	if($triggerValid1)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "answerphone_00");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
+	
+	return;
+}
+
+if($startingTriggerValid2)
+{
+	"MainCharacter".isInvincible = 1;
+	
+	$currentCleanCash = (stxogkpfppp() > 1000); 
+	$currentCopHeat = (stxadlbimkj() > 1000);
+	$currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1);
+	$currentAnimationRequestID = (("MainCharacter".GetAnimationRequestID()) == 0);
+	$currentVocalMS = (("MainCharacter".GetRemainingVocalMs()) == -1);
+	$currentHUDGameIsPaused = !HUD_IsGamePaused();
+	$currentMainCharacterPackageLoaded = CVM_IsMainCharacterPackageLoaded();
+	$currentMainCharacterKilledOrFlaggedOnForKilled = !IsMainCharacterKilledOrFlaggedForOnKilled();
+	$currentTeleporting = !IsTeleporting();
+	$currentVisibilityPoints = (!MGM_GetVisibilityPoints() && !MGM_VisibilityIsFucked() && !MGM_VisibilityIsRed());
+	$currentNIS = !NISIsPlaying();
+	$currentMissionScreen = ($gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+
+	$isSatellitePhoneOwned = IsSatPhoneOwned();
+	$isSafeToActivateDialogue = IsSafeToActivateDialog();
+	
+	ScheduleAlways("1", "HUD_SetGlobalSafeToActivate", "0");
+	ScheduleAlways("2", "GlobalSoundPlay", "tony", "snorting_00", "miami_cop_01_donutbribe_00");
+	
+	"MainCharacter".Schedule("3", "stxphahdkkj", "0");
+	
+	ScheduleAlways("4", "SoundFadeoutMix", "duck_phonecall");
+	
+	return;
+}
+
+return;

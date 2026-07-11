@@ -1,0 +1,11 @@
+function duck_phone_call()
+{
+	Schedule("1", "SoundFadeoutMix", "duck_phonecall");
+	
+	return;
+}
+
+Schedule("1", "SoundFadeinMix", "duck_phonecall");
+Schedule("2", "GlobalSoundPlay", "se_narrator", "objective_03", "duck_phone_call");
+
+return;

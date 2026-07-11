@@ -1,0 +1,3 @@
+ScheduleAlways("1", "GlobalSoundPlay", "se_narrator", "tonydeath_00");
+
+return;

@@ -1,0 +1,3 @@
+Schedule("777", "GlobalSoundPlay", "se57", "se57");
+
+return;

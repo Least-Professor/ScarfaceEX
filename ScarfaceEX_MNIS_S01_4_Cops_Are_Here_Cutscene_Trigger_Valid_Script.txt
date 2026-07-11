@@ -1,0 +1,3 @@
+stxdfoahmdk("MNIS_S01_4_Cops_Are_Here", "", "NIS");
+
+return;
