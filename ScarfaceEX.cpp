@@ -20,11 +20,80 @@
 // std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
 
 typedef void* CharacterObject;
+typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
+typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
 typedef int (__cdecl *Global_Sound_Get_Current_Function)();
 typedef int (__cdecl *DB_Get_Reputation_Level_Function)();
-typedef const char* (__cdecl *CVM_Get_Main_Character_Package_Function)();
+typedef int (__cdecl *MGM_Get_Visibility_Points_Function)();
 typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int, int);
-typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
+
+struct Dodges_Phone_Calls_Blocker_Struct
+{
+	unsigned long blockedTimer;
+	bool blockedFlag;
+	
+	void Reset()
+	{
+		blockedTimer = GetTickCount();
+		blockedFlag = false;
+	}
+}
+DPCBS_Struct;
+
+// Script Loader for Radical Entertainment Script Interpreter
+std::string Load_Script(const char* fileName)
+{
+	std::ifstream file(fileName);
+	
+	if (!file)
+		return "return;";
+	
+	std::ostringstream scriptBuffer;
+	scriptBuffer << file.rdbuf();
+	std::string result = scriptBuffer.str();
+	
+	return result;
+}
+
+// Loaded Scripts
+std::string Combat_Tutorial_Objectives_1_To_17_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objectives_1_To_17_Script.txt"),
+			Combat_Tutorial_Objective_2_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_2_Script.txt"),
+			Combat_Tutorial_Objective_3_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_3_Script.txt"),
+			Combat_Tutorial_Objective_4_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_4_Script.txt"),
+			Combat_Tutorial_Objective_5_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_5_Script.txt"),
+			Combat_Tutorial_Objective_6_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_6_Script.txt"),
+			Combat_Tutorial_Objective_7_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_7_Script.txt"),
+			Combat_Tutorial_Objective_8_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_8_Script.txt"),
+			Combat_Tutorial_Objective_9_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_9_Script.txt"),
+			Combat_Tutorial_Objective_10_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_10_Script.txt"),
+			Combat_Tutorial_Objective_11_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_11_Script.txt"),
+			Combat_Tutorial_Objective_12_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_12_Script.txt"),
+			Combat_Tutorial_Objective_13_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_13_Script.txt"),
+			Combat_Tutorial_Objective_14_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_14_Script.txt"),
+			Combat_Tutorial_Objective_15_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_15_Script.txt"),
+			Combat_Tutorial_Objective_16_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_16_Script.txt"),
+			Combat_Tutorial_Objective_18_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_18_Script.txt"), 
+			Cop_Bribe_Script = Load_Script("ScarfaceEX_Cop_Bribe_Script.txt"),
+			Gang_Bribe_Script = Load_Script("ScarfaceEX_Gang_Bribe_Script.txt"),
+			Main_Character_Switching_To_Valid_Package_Script = Load_Script("ScarfaceEX_Main_Character_Switching_To_Valid_Package_Script.txt"),
+			Main_Character_Switching_Done_Script = Load_Script("ScarfaceEX_Main_Character_Switching_Done_Script.txt"),
+			MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script = Load_Script("ScarfaceEX_MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_0_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_0_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_1_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_1_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_2_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_2_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_3_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_3_Script.txt"),
+			Narrator_Quotes_Triggered_For_Island_Package_4_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_4_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_0_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_0_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_1_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_1_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_2_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_2_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_3_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_3_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_4_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_4_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_5_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_5_Script.txt"),
+			Narrator_Quotes_Triggered_For_Miami_Package_6_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_6_Script.txt"),
+			Narrator_Quotes_Triggered_For_Main_Character_Death_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Main_Character_Death_Script.txt"),
+			Narrator_Quotes_Triggered_For_Main_Character_Switching_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Main_Character_Switching_Script.txt");
 
 // Characters Speaking Inside Vehicles Tracker
 static const int MAX_SPEAKERS = 64;
@@ -276,7 +345,9 @@ struct Config
 		rightKey, 
 		backKey, 
 		leftPeekShootKey, 
-		rightPeekShootKey; 								 			   
+		rightPeekShootKey,
+		copBribeKey,
+		gangBribeKey; 								 			   
     
 	// Microsoft Xinput Controller Bindings
 	WORD frontButton, 
@@ -284,7 +355,9 @@ struct Config
 		 rightButton, 
 		 backButton, 
 		 leftPeekShootButton, 
-		 rightPeekShootButton;
+		 rightPeekShootButton,
+		 copBribeButton,
+		 gangBribeButton;
 
 	// Direct-Input Controller Bindings
     int diFrontButton, 
@@ -292,7 +365,9 @@ struct Config
 		diRightButton, 
 		diBackButton, 
 		diLeftPeekShootButton, 
-		diRightPeekShootButton; 			   
+		diRightPeekShootButton,
+		diCopBribeButton,
+		diGangBribeButton; 			   
 	
 	// Animation Names
     std::string frontAnimation, 
@@ -319,7 +394,9 @@ struct Config
 				landVehicleDriverReverseTalking,
 				landVehiclePassengerTalking,
 				waterVehicleDriverTalking,
-				waterVehiclePassengerTalking;
+				waterVehiclePassengerTalking,
+				copBribeAnimation,
+				gangBribeAnimation;
     
 	// Press Mode
 	int pressMode;
@@ -567,7 +644,9 @@ struct DirectionalTrackers
 				 right, 
 				 back, 
 				 leftPeekShoot, 
-				 rightPeekShoot;
+				 rightPeekShoot,
+				 copBribe,
+				 gangBribe;
 } 
 g_Trackers;
 
@@ -582,11 +661,12 @@ Run_Script_Function Run_Script_Pointer = NULL;
 uintptr_t Run_Script_Address = 0;
 Global_Sound_Get_Current_Function Global_Sound_Get_Current_Pointer = (Global_Sound_Get_Current_Function)0x0049a420;
 DB_Get_Reputation_Level_Function DB_Get_Reputation_Level_Pointer = (DB_Get_Reputation_Level_Function)0x00433cb0;
+MGM_Get_Visibility_Points_Function MGM_Get_Visibility_Points_Pointer = (MGM_Get_Visibility_Points_Function)0x00642230;
 
 // Keyboard \ Mouse \ Microsoft Xinput Controller \ Direct-Input Controller States Tracker; Direct-Input Flag
-bool g_KeyboardState[6] = { false, false, false, false, false, false },
-	 g_ControllerState[6] = { false, false, false, false, false, false },
-	 g_DirectInputState[6] = { false, false, false, false, false, false }, 
+bool g_KeyboardState[8] = { false, false, false, false, false, false, false, false },
+	 g_ControllerState[8] = { false, false, false, false, false, false, false, false },
+	 g_DirectInputState[8] = { false, false, false, false, false, false, false, false }, 
 	 g_DirectInputEnabled = false;
 
 // DirectInput Globals
@@ -602,6 +682,23 @@ typedef void (__thiscall *SetPositionFunc)(void* camera, Vector* pos);
 typedef Vector* (__thiscall *GetBonePositionFunc)(CharacterObject* character, int boneId);
 SetPositionFunc g_OriginalSetPosition = NULL;
 GetBonePositionFunc g_GetBonePosition = NULL;
+
+// Visibility Points Tracker
+int MGM_Get_Visibility_Points_Wrapper()
+{
+	if (!MGM_Get_Visibility_Points_Pointer)
+		return -1;
+	
+	__try
+	{
+		return MGM_Get_Visibility_Points_Pointer();
+	}
+	
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		return -1;
+	}
+}
 
 // Reputation Level Tracker
 int DB_Get_Reputation_Level_Wrapper()
@@ -1029,6 +1126,8 @@ void LoadConfig()
 	g_Config.backKey = 'C';
 	g_Config.leftPeekShootKey = 'Q';
 	g_Config.rightPeekShootKey = 'E';
+	g_Config.copBribeKey = 'Y';
+	g_Config.gangBribeKey = 'U';
     
     g_Config.frontButton = XINPUT_GAMEPAD_A;
     g_Config.leftButton = XINPUT_GAMEPAD_B; 
@@ -1036,6 +1135,8 @@ void LoadConfig()
 	g_Config.backButton = XINPUT_GAMEPAD_Y;
 	g_Config.leftPeekShootButton = XINPUT_GAMEPAD_LEFT_SHOULDER;
 	g_Config.rightPeekShootButton = XINPUT_GAMEPAD_RIGHT_SHOULDER;
+	g_Config.copBribeButton = XINPUT_GAMEPAD_LEFT_THUMB;
+	g_Config.gangBribeButton = XINPUT_GAMEPAD_RIGHT_THUMB;
     
     g_Config.diFrontButton = 0;
     g_Config.diLeftButton = 1;
@@ -1043,6 +1144,8 @@ void LoadConfig()
     g_Config.diBackButton = 3;
     g_Config.diLeftPeekShootButton = 4;
     g_Config.diRightPeekShootButton = 5;
+	g_Config.diCopBribeButton = 6;
+	g_Config.diGangBribeButton = 7;
     
     g_Config.frontAnimation = "GEN_Action_Evade_Dive_N";
     g_Config.leftAnimation = "Left_Dive_Dodge_Roll_West";
@@ -1052,6 +1155,8 @@ void LoadConfig()
 	g_Config.rightPeekShootAnimation = "Right_Peek_Shoot";
 	g_Config.HealthRecovery = "Health_Recovery";
 	g_Config.SwitchingWeapons = "Switching_Weapons";
+	g_Config.copBribeAnimation = "Cop_Bribe";
+	g_Config.gangBribeAnimation = "Gang_Bribe";
 	
 	// Vehicles
 	g_Config.waterVehicleDriver = "Reset_Boat_Steer_Generic";
@@ -1220,6 +1325,8 @@ void LoadConfig()
 	{
         std::ofstream outFile(CONFIG_FILE);
 		outFile << "[Keyboard_Mouse_Controls]\n\n";
+		outFile << "Cop_Bribe_Key=Y\n";
+		outFile << "Gang_Bribe_Key=U\n";
 		outFile << "Front_Key=V\n";
 		outFile << "Left_Key=A\n";
 		outFile << "Right_Key=D\n";
@@ -1227,6 +1334,8 @@ void LoadConfig()
 		outFile << "Left_Peek_Shoot_Key=Q\n";
 		outFile << "Right_Peek_Shoot_Key=E\n\n";
 		outFile << "[Xbox_Controller]\n\n";
+		outFile << "Cop_Bribe_Button=L3\n";
+		outFile << "Gang_Bribe_Button=R3\n";
 		outFile << "Front_Button=A\n";
 		outFile << "Left_Button=B\n";
 		outFile << "Right_Button=X\n";
@@ -1239,8 +1348,12 @@ void LoadConfig()
 		outFile << "Right_Button=2\n";
 		outFile << "Back_Button=3\n";
 		outFile << "Left_Peek_Shoot_Button=4\n";
-		outFile << "Right_Peek_Shoot_Button=5\n\n";
+		outFile << "Right_Peek_Shoot_Button=5\n";
+		outFile << "Cop_Bribe_Button=6\n";
+		outFile << "Gang_Bribe_Button=7\n\n";
 		outFile << "[Animations]\n\n";
+		outFile << "Cop_Bribe_Animation=Cop_Bribe\n";
+		outFile << "Gang_Bribe_Animation=Gang_Bribe\n";
 		outFile << "Front_Animation=GEN_Action_Evade_Dive_N\n";
 		outFile << "Left_Animation=Left_Dive_Dodge_Roll_West\n";
 		outFile << "Right_Animation=Right_Dive_Dodge_Roll_East\n";
@@ -1326,6 +1439,12 @@ void LoadConfig()
             
 			if (key == "Right_Peek_Shoot_Key") 
 				g_Config.rightPeekShootKey = ParseKey(value);
+            
+			if (key == "Cop_Bribe_Key") 
+				g_Config.copBribeKey = ParseKey(value);
+            
+			if (key == "Gang_Bribe_Key") 
+				g_Config.gangBribeKey = ParseKey(value);
         }
         
 		if (section == "Xbox_Controller") 
@@ -1347,6 +1466,12 @@ void LoadConfig()
 			
 			if (key == "Right_Peek_Shoot_Button") 
 				g_Config.rightPeekShootButton = ParseButton(value);
+            
+			if (key == "Cop_Bribe_Button") 
+				g_Config.copBribeButton = ParseButton(value);
+			
+			if (key == "Gang_Bribe_Button") 
+				g_Config.gangBribeButton = ParseButton(value);
         }
         
 		if (section == "Direct_Input_Controller") 
@@ -1368,6 +1493,12 @@ void LoadConfig()
             
 			if (key == "Right_Peek_Shoot_Button") 
 				g_Config.diRightPeekShootButton = ParseInt(value, 5);
+            
+			if (key == "Cop_Bribe_Button") 
+				g_Config.diCopBribeButton = ParseInt(value, 6);
+            
+			if (key == "Gang_Bribe_Button") 
+				g_Config.diGangBribeButton = ParseInt(value, 7);
         }
         
 		if (section == "Animations") 
@@ -1395,6 +1526,12 @@ void LoadConfig()
             
 			if (key == "Switching_Weapons" && !value.empty()) 
 				g_Config.SwitchingWeapons = value; 
+            
+			if (key == "Cop_Bribe_Animation" && !value.empty()) 
+				g_Config.copBribeAnimation = value; 
+            
+			if (key == "Gang_Bribe_Animation" && !value.empty()) 
+				g_Config.gangBribeAnimation = value; 
         }
 		
 		if (section == "Behavior") 
@@ -1495,6 +1632,52 @@ bool IsInVehicle()
 	{
         return false;
     }
+} 
+
+// "RED VISIBILITY" Tracker
+bool MGM_Visibility_Is_Red()
+{
+    bool result = false;
+
+    __try
+    {
+        __asm
+        {
+            mov eax, 0x00642260
+            call eax
+            mov result, al
+        }
+    }
+
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        result = false;
+    }
+
+    return result;
+} 
+
+// "FUCKED VISIBILITY" Tracker
+bool MGM_Visibility_Is_Fucked()
+{
+    bool result = false;
+
+    __try
+    {
+        __asm
+        {
+            mov eax, 0x00642270
+            call eax
+            mov result, al
+        }
+    }
+
+    __except(EXCEPTION_EXECUTE_HANDLER)
+    {
+        result = false;
+    }
+
+    return result;
 } 
 
 // Main Character Alive \ Dead Tracker
@@ -2272,10 +2455,33 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
 // 'CharacterObject :: RequestAnimation()' Triggers Under Appropriate Conditions
 void Dodge(CharacterObject* player, const std::string& animName) 
 {
-    bool ActionMap = IsInVehicle();
+    bool ActionMap = IsInVehicle(),
+		 phoneCallsTriggerValid = (!DPCBS_Struct.blockedFlag && !MCS_Struct.narratorQuotesTriggered && !Get_Mission_Active() && (Current_Voice_MS(player) == -1)),
+		 phoneCallsTriggerValid0 = ((Get_Animation_Request_ID(player) == 0) && (GlobalSoundGetCurrentMs() == -1) && phoneCallsTriggerValid),
+		 phoneCallsTriggerValid1 = (!MGM_Get_Visibility_Points_Wrapper() && !MGM_Visibility_Is_Fucked() && !MGM_Visibility_Is_Red() && phoneCallsTriggerValid0),
+		 CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid1),
+		 GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid1); 
 	
 	if (ActionMap)
 		return;
+	
+	if (CopBribe)
+	{
+		RunScript(Cop_Bribe_Script.c_str());
+		DPCBS_Struct.blockedTimer = GetTickCount();
+		DPCBS_Struct.blockedFlag = true;
+		
+		return;
+	}
+	
+	if (GangBribe)
+	{
+		RunScript(Gang_Bribe_Script.c_str());
+		DPCBS_Struct.blockedTimer = GetTickCount();
+		DPCBS_Struct.blockedFlag = true;
+		
+		return;
+	}
 	
 	PlayAnimation(player, animName, 67);
 }
@@ -2410,6 +2616,8 @@ void CheckKeyboard(CharacterObject* player, unsigned long now)
     CheckKeyboardKey(player, g_Config.backKey, 3, g_Trackers.back, g_Config.backAnimation, now);
     CheckKeyboardKey(player, g_Config.leftPeekShootKey, 4, g_Trackers.leftPeekShoot, g_Config.leftPeekShootAnimation, now);
     CheckKeyboardKey(player, g_Config.rightPeekShootKey, 5, g_Trackers.rightPeekShoot, g_Config.rightPeekShootAnimation, now);
+    CheckKeyboardKey(player, g_Config.copBribeKey, 6, g_Trackers.copBribe, g_Config.copBribeAnimation, now);
+    CheckKeyboardKey(player, g_Config.gangBribeKey, 7, g_Trackers.gangBribe, g_Config.gangBribeAnimation, now);
 }
 
 void CheckControllerButton(CharacterObject* player, WORD buttons, WORD button, int index, PressTracker& tracker, const std::string& animation, unsigned long now) 
@@ -2453,6 +2661,8 @@ void CheckController(CharacterObject* player, unsigned long now)
     CheckControllerButton(player, buttons, g_Config.backButton, 3, g_Trackers.back, g_Config.backAnimation, now);
     CheckControllerButton(player, buttons, g_Config.leftPeekShootButton, 4, g_Trackers.leftPeekShoot, g_Config.leftPeekShootAnimation, now);
     CheckControllerButton(player, buttons, g_Config.rightPeekShootButton, 5, g_Trackers.rightPeekShoot, g_Config.rightPeekShootAnimation, now);
+    CheckControllerButton(player, buttons, g_Config.copBribeButton, 6, g_Trackers.copBribe, g_Config.copBribeAnimation, now);
+    CheckControllerButton(player, buttons, g_Config.gangBribeButton, 7, g_Trackers.gangBribe, g_Config.gangBribeAnimation, now);
 }
 
 //  Direct-Input Devices Enumeration
@@ -2604,6 +2814,8 @@ void CheckDirectInput(CharacterObject* player, unsigned long now)
     CheckDirectInputButton(player, js, g_Config.diBackButton, 3, g_Trackers.back, g_Config.backAnimation, now);
     CheckDirectInputButton(player, js, g_Config.diLeftPeekShootButton, 4, g_Trackers.leftPeekShoot, g_Config.leftPeekShootAnimation, now);
     CheckDirectInputButton(player, js, g_Config.diRightPeekShootButton, 5, g_Trackers.rightPeekShoot, g_Config.rightPeekShootAnimation, now);
+    CheckDirectInputButton(player, js, g_Config.diCopBribeButton, 6, g_Trackers.copBribe, g_Config.copBribeAnimation, now);
+    CheckDirectInputButton(player, js, g_Config.diGangBribeButton, 7, g_Trackers.gangBribe, g_Config.gangBribeAnimation, now);
 } 
 
 // Vehicles' Idles' Cancellation Input Detection
@@ -3092,12 +3304,12 @@ void Health_Recovery_Function(CharacterObject* player)
 		currentAnimation = Get_Animation_Request_ID(player), 
 		actionMap = *(int*)ADDR_VehicleState,
 		currentDrawnWeapon = Get_Current_Drawn_Weapon(player),
-		currentWeapon = Get_Current_Weapon(player), 
-		weapon_State = Get_Weapon_State(player);
+		gunUpState = Gun_Up_State(player);
 
-	bool refreshFunction = (actionMap != 0 || currentHealth <= 0 || weapon_State != 0 || currentAnimation || HRS_Struct.lastHealth == -1 || currentDrawnWeapon || currentWeapon || currentLocomotionRingType);
+	bool refreshFunction = (actionMap || currentHealth <= 0 || HRS_Struct.lastHealth == -1 || currentLocomotionRingType || gunUpState || currentDrawnWeapon),
+		 refreshFunction0 = (refreshFunction || currentAnimation);
 	
-	if (refreshFunction)
+	if (refreshFunction0)
 	{
 		HRS_Struct.lastHealth = currentHealth;
 		HRS_Struct.lastX = *(float*)((uintptr_t)player + 0x34 + 48);
@@ -3151,12 +3363,23 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 			 currentDeathStatus = Main_Character_Death_Status();
 		
 		scarfaceEXTriggerValid = (!currentNIS && !currentGamePaused && !currentScreenFXTransition && !currentTeleportation && !currentDeathStatus && !Main_Menu);
+	
+		if (currentNIS)
+		{
+			DPCBS_Struct.blockedTimer = GetTickCount();
+			DPCBS_Struct.blockedFlag = true;
+		}
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		scarfaceEXTriggerValid = false;
 	}
+	
+	bool blockedTimerReset = (!scarfaceEXTriggerValid && DPCBS_Struct.blockedFlag);
+	
+	if (blockedTimerReset)
+		DPCBS_Struct.blockedTimer = GetTickCount();
 	
 	return scarfaceEXTriggerValid;
 }
@@ -3204,11 +3427,11 @@ void Main_Character_Switching_Function()
     if (Main_Character_Switched)
 	{
 		if (Valid_Package)
-			RunScript("Schedule(\"777\", \"PCM_PlayPhoneCall\", \"tony\", \"call_cleaner_00\");");
+			RunScript(Main_Character_Switching_To_Valid_Package_Script.c_str());
 		
 		else
 		{
-			RunScript("Schedule(\"1\", \"SetBlockingActionMap\", \"1\"); Schedule(\"2\", \"SoundFadeinMix\", \"duck_cinematics\"); Schedule(\"3\", \"HUDSetElementEnabled\", \"EHE_INVENTORY_SELECTION_HUD\", \"0\");");
+			RunScript(Narrator_Quotes_Triggered_For_Main_Character_Switching_Script.c_str());
 			MCS_Struct.narratorQuotesTriggered = true;
 			MCS_Struct.lastTimer = GetTickCount();
 			// debugFile << "Narrator Quotes Triggered: "<< MCS_Struct.narratorQuotesTriggered <<"\n";
@@ -3216,22 +3439,22 @@ void Main_Character_Switching_Function()
 			if (Island_Package)
 			{
 				if (MCS_Struct.islandsNarratorQuotes == 0UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se57\", \"se57\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_Script.c_str());
 				
 				if (MCS_Struct.islandsNarratorQuotes == 1UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se58\", \"se58\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_0_Script.c_str());
 				
 				if (MCS_Struct.islandsNarratorQuotes == 2UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se59\", \"se59\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_1_Script.c_str());
 				
 				if (MCS_Struct.islandsNarratorQuotes == 3UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se60\", \"se60\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_2_Script.c_str());
 				
 				if (MCS_Struct.islandsNarratorQuotes == 4UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se61\", \"se61\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_3_Script.c_str());
 				
 				if (MCS_Struct.islandsNarratorQuotes == 5UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se62\", \"se62\");");
+					RunScript(Narrator_Quotes_Triggered_For_Island_Package_4_Script.c_str());
 				
 				MCS_Struct.islandsNarratorQuotes = Islands_Narrator_Quotes();
 			}
@@ -3239,28 +3462,28 @@ void Main_Character_Switching_Function()
 			else
 			{
 				if (MCS_Struct.miamiNarratorQuotes == 0UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"ee_00\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 1UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"introduction_00\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_0_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 2UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"mojo\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_1_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 3UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_01\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_2_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 4UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_02\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_3_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 5UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_03\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_4_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 6UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_04\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_5_Script.c_str());
 				
 				if (MCS_Struct.miamiNarratorQuotes == 7UL)
-					RunScript("Schedule(\"777\", \"GlobalSoundPlay\", \"se_narrator\", \"shoutout_05\");");
+					RunScript(Narrator_Quotes_Triggered_For_Miami_Package_6_Script.c_str());
 				
 				MCS_Struct.miamiNarratorQuotes = Miami_Narrator_Quotes();
 			}	
@@ -3270,16 +3493,30 @@ void Main_Character_Switching_Function()
     MCS_Struct.lastPackage = currentPackage;
 }
 
+void Reset_Action_Map()
+{
+	unsigned long currentTimer = GetTickCount();
+	bool currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
+		 resetActionMap = (((currentTimer - DPCBS_Struct.blockedTimer) > 12357UL) && currentGlobalSoundMS && DPCBS_Struct.blockedFlag),
+		 resetTimer = (DPCBS_Struct.blockedFlag && !currentGlobalSoundMS);
+		 
+	if (resetTimer)
+		DPCBS_Struct.blockedTimer = currentTimer;
+		 
+	if (resetActionMap)
+		DPCBS_Struct.blockedFlag = false;
+}
+
 void Narrator_Quotes_Reset_Input()
 {	
 	unsigned long currentTimer = GetTickCount();
 	bool currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
-		 timerTracker = ((currentTimer - MCS_Struct.lastTimer) > 1111UL),
+		 timerTracker = ((currentTimer - MCS_Struct.lastTimer) > 1235UL),
 		 globalSoundMSTracker = (currentGlobalSoundMS && MCS_Struct.lastGlobalSoundMS && MCS_Struct.narratorQuotesTriggered && timerTracker);
 		 
 	if (globalSoundMSTracker)
 	{
-		RunScript("ScheduleAlways(\"1\", \"SoundFadeoutMix\", \"duck_cinematics\"); ScheduleAlways(\"2\", \"SetBlockingActionMap\", \"0\"); ScheduleAlways(\"3\", \"HUDSetElementEnabled\", \"EHE_INVENTORY_SELECTION_HUD\", \"1\");");
+		RunScript(Main_Character_Switching_Done_Script.c_str());
 		MCS_Struct.narratorQuotesTriggered = false;
 		// debugFile << "Input Reset: "<< (!MCS_Struct.narratorQuotesTriggered) <<"\n";
 	}
@@ -3341,7 +3578,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 	
 	if (missionStarted)
 	{
-		RunScript("Schedule(\"1235\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_01\"); Schedule(\"3571\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_17\");");
+		RunScript(Combat_Tutorial_Objectives_1_To_17_Script.c_str());
 		CTMNVS_Struct.missionStarted = true;
 		return;
 	}
@@ -3357,14 +3594,14 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 	
 	if (missionComplete)
 	{
-		RunScript("Schedule(\"3572\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_16\");");
+		RunScript(Combat_Tutorial_Objective_16_Script.c_str());
 		CTMNVS_Struct.missionComplete = true;
 		return;
 	}
 	
 	if (weaponPickedUp)
 	{
-		RunScript("Schedule(\"1\", \"GlobalSoundStop\"); Schedule(\"2\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_05\");");
+		RunScript(Combat_Tutorial_Objective_5_Script.c_str());
 		CTMNVS_Struct.lastTimer = currentTimer;
 		CTMNVS_Struct.weaponPickedUp = true;
 		CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3384,7 +3621,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		{			
 			if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 5UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_10\");");
+				RunScript(Combat_Tutorial_Objective_10_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3393,7 +3630,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 4UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_09\");");
+				RunScript(Combat_Tutorial_Objective_9_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3402,7 +3639,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 3UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_08\");");
+				RunScript(Combat_Tutorial_Objective_8_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3412,7 +3649,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		
 		if (weaponYetToBePickedUp)
 		{
-			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_06\");");
+			RunScript(Combat_Tutorial_Objective_6_Script.c_str());
 			CTMNVS_Struct.lastTimer = currentTimer;
 			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
 			return;
@@ -3422,7 +3659,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		{
 			if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 3UL || CTMNVS_Struct.nextQuote == 4UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_14\");");
+				RunScript(Combat_Tutorial_Objective_14_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3431,7 +3668,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 5UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_15\");");
+				RunScript(Combat_Tutorial_Objective_15_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3443,7 +3680,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		{
 			if (CTMNVS_Struct.nextQuote == 0UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_11\");");
+				RunScript(Combat_Tutorial_Objective_11_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3452,7 +3689,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 1UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_13\");");
+				RunScript(Combat_Tutorial_Objective_13_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3461,7 +3698,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 2UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_18\");");
+				RunScript(Combat_Tutorial_Objective_18_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3470,7 +3707,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 3UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_12\");");
+				RunScript(Combat_Tutorial_Objective_12_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3479,7 +3716,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 			
 			if (CTMNVS_Struct.nextQuote == 5UL)
 			{
-				RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_07\");");
+				RunScript(Combat_Tutorial_Objective_7_Script.c_str());
 				CTMNVS_Struct.nextQuote = Random_Quotes();
 				CTMNVS_Struct.lastTimer = currentTimer;
 				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3489,7 +3726,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 
 		if (CTMNVS_Struct.nextQuote == 0UL || CTMNVS_Struct.nextQuote == 5UL)
 		{
-			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_04\");");
+			RunScript(Combat_Tutorial_Objective_4_Script.c_str());
 			CTMNVS_Struct.nextQuote = Random_Quotes();
 			CTMNVS_Struct.lastTimer = currentTimer;
 			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3498,7 +3735,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		
 		if (CTMNVS_Struct.nextQuote == 1UL || CTMNVS_Struct.nextQuote == 4UL)
 		{
-			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_03\");");
+			RunScript(Combat_Tutorial_Objective_3_Script.c_str());
 			CTMNVS_Struct.nextQuote = Random_Quotes();
 			CTMNVS_Struct.lastTimer = currentTimer;
 			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3507,7 +3744,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		
 		if (CTMNVS_Struct.nextQuote == 2UL || CTMNVS_Struct.nextQuote == 3UL)
 		{
-			RunScript("Schedule(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"objective_02\");");
+			RunScript(Combat_Tutorial_Objective_2_Script.c_str());
 			CTMNVS_Struct.nextQuote = Random_Quotes();
 			CTMNVS_Struct.lastTimer = currentTimer;
 			CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
@@ -3544,7 +3781,7 @@ void Unused_Cutscenes_Function(CharacterObject* player)
 	
 	if (MNIS_S01_4_Cops_Are_Here)
 	{
-		RunScript("stxdfoahmdk(\"MNIS_S01_4_Cops_Are_Here\", \"\", \"NIS\");");
+		RunScript(MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script.c_str());
 		UCS_Struct.MNIS_S01_4_Cops_Are_Here = true;
 	}
 }
@@ -3589,7 +3826,7 @@ void Narrator_Death_Quotes_Function(CharacterObject* player)
 	
 	if (narratorDeathQuotesTriggerValid)
 	{
-		RunScript("ScheduleAlways(\"1\", \"GlobalSoundPlay\", \"se_narrator\", \"tonydeath_00\");");
+		RunScript(Narrator_Quotes_Triggered_For_Main_Character_Death_Script.c_str());
 		NDQS_Struct.narratorDeathQuotesTriggerValid = true;
 	}
 	
@@ -3764,7 +4001,7 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			 currentMission = Get_Mission_Active(),
 			 combatTutorial = ((currentPackage == "MCP_ArmyTony") && !CTMNVS_Struct.missionComplete && currentMission),
 			 mansionEscape = ((currentPackage == "MCP_BlackSuitTony") && !UCS_Struct.MNIS_S01_4_Cops_Are_Here && currentMission), 
-			 Dodges_Trigger_Valid = (now - g_LastDodgeTime >= g_Config.cooldown),
+			 Dodges_Trigger_Valid = ((now - g_LastDodgeTime) >= g_Config.cooldown),
 			 VehicleIdleStatesTriggerValid = (Seating_Position && !Shooting && !Weapon_State),
 			 reputationLevelInsufficient = ((currentReputationLevel < 1) && (currentPackage != "MCP_Driver")),
 			 assassinKillingExBoyFriend = ((IsInVehicle() || Get_Current_Drawn_Weapon(p) || Get_Current_Weapon(p)) && (currentPackage == "MCP_Assassin")),
@@ -3773,6 +4010,9 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			 
 		if (characterSwitchingInvalid)
 			MCS_Struct.lastPackage = currentPackage;
+		
+		if (DPCBS_Struct.blockedFlag)
+			Reset_Action_Map();
 		
 		if (Dodges_Trigger_Valid) 
         {
@@ -3827,6 +4067,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 		CTMNVS_Struct.Reset();
 		UCS_Struct.Reset();
 		NDQS_Struct.Reset();
+		DPCBS_Struct.Reset();
 
 		// Characters' States' Initialisation
 		for (int i = 0; i < MAX_NPCS; i++)       
