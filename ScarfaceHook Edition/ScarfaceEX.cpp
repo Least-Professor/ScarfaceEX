@@ -1588,30 +1588,7 @@ bool Is_NIS_Active()
     }
 
     return result;
-}  
-
-// Game State Tracker
-bool Is_Game_In_Normal_Game_State()
-{
-    bool result = false;
-
-    __try
-    {
-        __asm
-        {
-            mov eax, 0x004F5820
-            call eax
-            mov result, al
-        }
-    }
-
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        return false;
-    }
-
-    return result;
-} 
+}
 
 // Pause Menu Tracker
 bool Is_Game_Paused_HUD()
@@ -3102,14 +3079,13 @@ bool Character_Switching_Trigger_Valid(CharacterObject* p)
 	
 	__try
 	{
-		bool currentNormalGameState = Is_Game_In_Normal_Game_State(), 
-			 currentMission = Get_Mission_Active(),
+		bool currentMission = Get_Mission_Active(),
 			 currentAnimation = (Get_Animation_Request_ID(p) != -1),
 			 currentVocalMS = (Current_Voice_MS(p) == -1),
 			 currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
 			 Player_Vehicle_Active = IsInVehicle();
 		
-		characterSwitchingTriggerValid = (currentNormalGameState && !currentMission && !Player_Vehicle_Active && currentAnimation && currentVocalMS && currentGlobalSoundMS);
+		characterSwitchingTriggerValid = (!currentMission && !Player_Vehicle_Active && currentAnimation && currentVocalMS && currentGlobalSoundMS);
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
