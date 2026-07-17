@@ -17,7 +17,14 @@
 #define ADDR_VehicleState 0x007BC51C
 #define CONFIG_FILE "ScarfaceEX_Configuration.ini"
 #define README_FILE "ScarfaceEX_Instructions.txt"
-// std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
+#define S_PREFIX "ScarfaceEX_"
+#define CTO_PREFIX "Combat_Tutorial_Objective"
+#define MCS_PREFIX "Main_Character_Switching_"
+#define NQTF_PREFIX "Narrator_Quotes_Triggered_For_"
+#define IP_PREFIX "Island_Package_"
+#define MP_PREFIX "Miami_Package_"
+#define S_SUFFIX "Script.txt"
+//std::ofstream debugFile("ScarfaceEX_Debug.txt", std::ios::app);
 
 typedef void* CharacterObject;
 typedef void (__cdecl *Run_Script_Function)(const char*, int, int, int, int);
@@ -56,44 +63,44 @@ std::string Load_Script(const char* fileName)
 }
 
 // Loaded Scripts
-std::string Combat_Tutorial_Objectives_1_To_17_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objectives_1_To_17_Script.txt"),
-			Combat_Tutorial_Objective_2_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_2_Script.txt"),
-			Combat_Tutorial_Objective_3_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_3_Script.txt"),
-			Combat_Tutorial_Objective_4_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_4_Script.txt"),
-			Combat_Tutorial_Objective_5_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_5_Script.txt"),
-			Combat_Tutorial_Objective_6_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_6_Script.txt"),
-			Combat_Tutorial_Objective_7_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_7_Script.txt"),
-			Combat_Tutorial_Objective_8_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_8_Script.txt"),
-			Combat_Tutorial_Objective_9_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_9_Script.txt"),
-			Combat_Tutorial_Objective_10_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_10_Script.txt"),
-			Combat_Tutorial_Objective_11_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_11_Script.txt"),
-			Combat_Tutorial_Objective_12_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_12_Script.txt"),
-			Combat_Tutorial_Objective_13_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_13_Script.txt"),
-			Combat_Tutorial_Objective_14_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_14_Script.txt"),
-			Combat_Tutorial_Objective_15_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_15_Script.txt"),
-			Combat_Tutorial_Objective_16_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_16_Script.txt"),
-			Combat_Tutorial_Objective_18_Script = Load_Script("ScarfaceEX_Combat_Tutorial_Objective_18_Script.txt"), 
-			Cop_Bribe_Script = Load_Script("ScarfaceEX_Cop_Bribe_Script.txt"),
-			Gang_Bribe_Script = Load_Script("ScarfaceEX_Gang_Bribe_Script.txt"),
-			Main_Character_Switching_To_Valid_Package_Script = Load_Script("ScarfaceEX_Main_Character_Switching_To_Valid_Package_Script.txt"),
-			Main_Character_Switching_Done_Script = Load_Script("ScarfaceEX_Main_Character_Switching_Done_Script.txt"),
-			MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script = Load_Script("ScarfaceEX_MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_0_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_0_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_1_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_1_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_2_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_2_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_3_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_3_Script.txt"),
-			Narrator_Quotes_Triggered_For_Island_Package_4_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Island_Package_4_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_0_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_0_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_1_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_1_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_2_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_2_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_3_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_3_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_4_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_4_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_5_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_5_Script.txt"),
-			Narrator_Quotes_Triggered_For_Miami_Package_6_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Miami_Package_6_Script.txt"),
-			Narrator_Quotes_Triggered_For_Main_Character_Death_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Main_Character_Death_Script.txt"),
-			Narrator_Quotes_Triggered_For_Main_Character_Switching_Script = Load_Script("ScarfaceEX_Narrator_Quotes_Triggered_For_Main_Character_Switching_Script.txt");
+std::string Combat_Tutorial_Objectives_1_To_17_Script = Load_Script(S_PREFIX CTO_PREFIX "s_1_To_17_" S_SUFFIX),
+			Combat_Tutorial_Objective_2_Script = Load_Script(S_PREFIX CTO_PREFIX "_2_" S_SUFFIX),
+			Combat_Tutorial_Objective_3_Script = Load_Script(S_PREFIX CTO_PREFIX "_3_" S_SUFFIX),
+			Combat_Tutorial_Objective_4_Script = Load_Script(S_PREFIX CTO_PREFIX "_4_" S_SUFFIX),
+			Combat_Tutorial_Objective_5_Script = Load_Script(S_PREFIX CTO_PREFIX "_5_" S_SUFFIX),
+			Combat_Tutorial_Objective_6_Script = Load_Script(S_PREFIX CTO_PREFIX "_6_" S_SUFFIX),
+			Combat_Tutorial_Objective_7_Script = Load_Script(S_PREFIX CTO_PREFIX "_7_" S_SUFFIX),
+			Combat_Tutorial_Objective_8_Script = Load_Script(S_PREFIX CTO_PREFIX "_8_" S_SUFFIX),
+			Combat_Tutorial_Objective_9_Script = Load_Script(S_PREFIX CTO_PREFIX "_9_" S_SUFFIX),
+			Combat_Tutorial_Objective_10_Script = Load_Script(S_PREFIX CTO_PREFIX "_10_" S_SUFFIX),
+			Combat_Tutorial_Objective_11_Script = Load_Script(S_PREFIX CTO_PREFIX "_11_" S_SUFFIX),
+			Combat_Tutorial_Objective_12_Script = Load_Script(S_PREFIX CTO_PREFIX "_12_" S_SUFFIX),
+			Combat_Tutorial_Objective_13_Script = Load_Script(S_PREFIX CTO_PREFIX "_13_" S_SUFFIX),
+			Combat_Tutorial_Objective_14_Script = Load_Script(S_PREFIX CTO_PREFIX "_14_" S_SUFFIX),
+			Combat_Tutorial_Objective_15_Script = Load_Script(S_PREFIX CTO_PREFIX "_15_" S_SUFFIX),
+			Combat_Tutorial_Objective_16_Script = Load_Script(S_PREFIX CTO_PREFIX "_16_" S_SUFFIX),
+			Combat_Tutorial_Objective_18_Script = Load_Script(S_PREFIX CTO_PREFIX "_18_" S_SUFFIX), 
+			Cop_Bribe_Script = Load_Script(S_PREFIX "Cop_Bribe_" S_SUFFIX),
+			Gang_Bribe_Script = Load_Script(S_PREFIX "Gang_Bribe_" S_SUFFIX),
+			Main_Character_Switching_To_Valid_Package_Script = Load_Script(S_PREFIX MCS_PREFIX "To_Valid_Package_" S_SUFFIX),
+			Main_Character_Switching_Done_Script = Load_Script(S_PREFIX MCS_PREFIX "Done_" S_SUFFIX),
+			MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_Script = Load_Script(S_PREFIX "MNIS_S01_4_Cops_Are_Here_Cutscene_Trigger_Valid_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_0_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX "0_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_1_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX "1_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_2_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX "2_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_3_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX "3_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Island_Package_4_Script = Load_Script(S_PREFIX NQTF_PREFIX IP_PREFIX "4_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_0_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "0_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_1_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "1_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_2_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "2_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_3_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "3_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_4_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "4_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_5_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "5_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Miami_Package_6_Script = Load_Script(S_PREFIX NQTF_PREFIX MP_PREFIX "6_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Main_Character_Death_Script = Load_Script(S_PREFIX NQTF_PREFIX "Main_Character_Death_" S_SUFFIX),
+			Narrator_Quotes_Triggered_For_Main_Character_Switching_Script = Load_Script(S_PREFIX NQTF_PREFIX MCS_PREFIX S_SUFFIX);
 
 // Characters Speaking Inside Vehicles Tracker
 static const int MAX_SPEAKERS = 64;
@@ -2044,35 +2051,7 @@ int Get_Current_Drawn_Weapon(CharacterObject* character)
     }
 
     return result;
-} 
-
-// Current Weapon Detector
-int Get_Current_Weapon(CharacterObject* character)
-{
-    if (!character)
-        return -1;
-
-    int result = -1;
-
-    __try
-    {
-        __asm
-        {
-            push character
-            mov eax, 0x005882A0
-            call eax
-            add esp, 4
-            mov result, eax
-        }
-    }
-
-    __except(EXCEPTION_EXECUTE_HANDLER)
-    {
-        return -1;
-    }
-
-    return result;
-} 
+}  
 
 // Animation Request ID
 int Get_Animation_Request_ID(CharacterObject* character)
@@ -2432,23 +2411,36 @@ int PlayAnimation(CharacterObject* player, const std::string& animName, int prio
 // 'CharacterObject :: RequestAnimation()' Triggers Under Appropriate Conditions
 void Dodge(CharacterObject* player, const std::string& animName) 
 {
-    bool ActionMap = IsInVehicle(),
-		 phoneCallsTriggerValid = (!DPCBS_Struct.blockedFlag && !MCS_Struct.narratorQuotesTriggered && !Get_Mission_Active() && (Current_Voice_MS(player) == -1)),
-		 phoneCallsTriggerValid0 = ((Get_Animation_Request_ID(player) == 0) && (GlobalSoundGetCurrentMs() == -1) && phoneCallsTriggerValid),
-		 phoneCallsTriggerValid1 = (!MGM_Get_Visibility_Points_Wrapper() && !MGM_Visibility_Is_Fucked() && !MGM_Visibility_Is_Red() && phoneCallsTriggerValid0),
-		 CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid1 && (DB_Get_Reputation_Level_Wrapper() >= 2)),
-		 GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid1 && (DB_Get_Reputation_Level_Wrapper() >= 2)); 
+    std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
+	bool ActionMap = (IsInVehicle() || NPC_IsInBoat(player) || NPC_IsInCar(player)),
+		 CopBribe = false,
+		 GangBribe = false,
+		 phoneCallsTriggerValid[6] = {false, false, false, false, false, false},
+		 dodgesTriggerValid = false;
+		 
+	phoneCallsTriggerValid[0] = (!DPCBS_Struct.blockedFlag && !MCS_Struct.narratorQuotesTriggered && !Get_Mission_Active() && (Current_Voice_MS(player) == -1));
+	phoneCallsTriggerValid[1] = (phoneCallsTriggerValid[0] && (Get_Animation_Request_ID(player) == 0) && (GlobalSoundGetCurrentMs() == -1));
+	phoneCallsTriggerValid[2] = (phoneCallsTriggerValid[1] && !MGM_Visibility_Is_Red() && !MGM_Get_Visibility_Points_Wrapper() && !MGM_Visibility_Is_Fucked());
+	phoneCallsTriggerValid[3] = (phoneCallsTriggerValid[2] && (DB_Get_Reputation_Level_Wrapper() >= 2) && (currentPackage != "MCP_Assassin"));
+	phoneCallsTriggerValid[4] = (phoneCallsTriggerValid[3] && (currentPackage != "MCP_Driver") && (currentPackage != "MCP_Enforcer") && !Gun_Up_State(player));
+	phoneCallsTriggerValid[5] = (phoneCallsTriggerValid[4] && !Get_Current_Drawn_Weapon(player) && !Crouch_State(player));
+	
+	CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid[4]);
+	GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid[4]);
+	
+	dodgesTriggerValid = ((animName != "Cop_Bribe") && (animName != "Gang_Bribe"));
 	
 	if (ActionMap)
-		return;
+	{
+		DPCBS_Struct.blockedTimer = GetTickCount();
+		DPCBS_Struct.blockedFlag = true;
+	}
 	
 	if (CopBribe)
 	{
 		RunScript(Cop_Bribe_Script.c_str());
 		DPCBS_Struct.blockedTimer = GetTickCount();
 		DPCBS_Struct.blockedFlag = true;
-		
-		return;
 	}
 	
 	if (GangBribe)
@@ -2456,11 +2448,10 @@ void Dodge(CharacterObject* player, const std::string& animName)
 		RunScript(Gang_Bribe_Script.c_str());
 		DPCBS_Struct.blockedTimer = GetTickCount();
 		DPCBS_Struct.blockedFlag = true;
-		
-		return;
 	}
 	
-	PlayAnimation(player, animName, 67);
+	if (dodgesTriggerValid)
+		PlayAnimation(player, animName, 67);
 }
 
 // 1st Person Camera Triggers for Player Set Conditions
@@ -3364,25 +3355,23 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 // Character Switching Phone Calls' & Voice Lines' Validation Tracker
 bool Character_Switching_Trigger_Valid(CharacterObject* p)
 {
-	bool characterSwitchingTriggerValid = false;
+	bool characterSwitchingTriggerValid[5] = {false, false, false, false, false};
 	
 	__try
 	{
-		bool currentMission = Get_Mission_Active(),
-			 currentAnimation = (Get_Animation_Request_ID(p) != -1),
-			 currentVocalMS = (Current_Voice_MS(p) == -1),
-			 currentGlobalSoundMS = (GlobalSoundGetCurrentMs() == -1),
-			 Player_Vehicle_Active = IsInVehicle();
-		
-		characterSwitchingTriggerValid = (!currentMission && !Player_Vehicle_Active && currentAnimation && currentVocalMS && currentGlobalSoundMS);
+		characterSwitchingTriggerValid[0] = (!Get_Mission_Active() && !IsInVehicle() && (Get_Animation_Request_ID(p) != -1) && (Current_Voice_MS(p) == -1));
+		characterSwitchingTriggerValid[1] = (characterSwitchingTriggerValid[0] && (GlobalSoundGetCurrentMs() == -1) && !NPC_IsInCar(p) && !NPC_IsInBoat(p));
+		characterSwitchingTriggerValid[2] = (characterSwitchingTriggerValid[1] && !Current_Locomotion_Ring_Type(p) && !Get_Current_Drawn_Weapon(p));
+		characterSwitchingTriggerValid[3] = (characterSwitchingTriggerValid[2] && !Gun_Up_State(p) && !Crouch_State(p) && !Get_Weapon_State(p));
+		characterSwitchingTriggerValid[4] = (characterSwitchingTriggerValid[3] && !Dead_Body_Tracker(p));
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		characterSwitchingTriggerValid = false;
+		return false;
 	}
 	
-	return characterSwitchingTriggerValid;
+	return characterSwitchingTriggerValid[4];
 }
 
 // Main Character Switching Detection
@@ -3396,9 +3385,13 @@ void Main_Character_Switching_Function()
 	}
 	
 	std::string currentPackage = CVM_Get_Main_Character_Package_Wrapper();
-    bool Main_Character_Switched = (currentPackage != MCS_Struct.lastPackage),
-		 Island_Package = (currentPackage == "MCP_HawaiianTony" || currentPackage == "MCP_HawaiianShadesTony" || currentPackage == "MCP_SandyShadesTony" || currentPackage == "MCP_SandyTony"),
+	bool Island_Package[2] = {false, false},
+		 Main_Character_Switched = false,
 		 Valid_Package = (currentPackage == "MCP_Assassin" || currentPackage == "MCP_Driver" || currentPackage == "MCP_Enforcer");
+		 
+	Island_Package[0] = (currentPackage == "MCP_HawaiianTony" || currentPackage == "MCP_HawaiianShadesTony" || currentPackage == "MCP_SandyShadesTony");
+	Island_Package[1] = (currentPackage == "MCP_SandyTony" || Island_Package[0]);
+	Main_Character_Switched = ((currentPackage != MCS_Struct.lastPackage) && (Valid_Package || (DB_Get_Reputation_Level_Wrapper() > 1)));
 
     if (Main_Character_Switched)
 	{
@@ -3412,7 +3405,7 @@ void Main_Character_Switching_Function()
 			MCS_Struct.lastTimer = GetTickCount();
 			// debugFile << "Narrator Quotes Triggered: "<< MCS_Struct.narratorQuotesTriggered <<"\n";
 			
-			if (Island_Package)
+			if (Island_Package[1])
 			{
 				if (MCS_Struct.islandsNarratorQuotes == 0UL)
 					RunScript(Narrator_Quotes_Triggered_For_Island_Package_Script.c_str());
@@ -3523,7 +3516,7 @@ bool Combat_Tutorial_Weapon_Pickup_Valid(CharacterObject* player)
 void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* player)
 {	
 	int currentDrawnWeapon = Get_Current_Drawn_Weapon(player);	
-	bool currentWeapon = (Get_Current_Weapon(player) > 0), 
+	bool currentWeapon = (currentDrawnWeapon > 0), 
 		 playerVehicleActive = IsInVehicle(), 
 		 globalSoundActive = (GlobalSoundGetCurrentMs() != -1), 
 		 weaponYetToPickUp = (Combat_Tutorial_Weapon_Pickup_Valid(player) && !CTMNVS_Struct.weaponPickedUp && !CTMNVS_Struct.weaponYetToPickUp), 
@@ -3961,6 +3954,9 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			if (MCS_Struct.narratorQuotesTriggered)
 				MCS_Struct.lastTimer = now;
 			
+			if (DPCBS_Struct.blockedFlag)
+				DPCBS_Struct.blockedTimer = GetTickCount();
+			
 			continue;
 		}
 		
@@ -3979,15 +3975,24 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			 mansionEscape = ((currentPackage == "MCP_BlackSuitTony") && !UCS_Struct.MNIS_S01_4_Cops_Are_Here && currentMission), 
 			 Dodges_Trigger_Valid = ((now - g_LastDodgeTime) >= g_Config.cooldown),
 			 VehicleIdleStatesTriggerValid = (Seating_Position && !Shooting && !Weapon_State),
-			 reputationLevelInsufficient = ((currentReputationLevel < 1) && (currentPackage != "MCP_Driver")),
-			 assassinKillingExBoyFriend = ((IsInVehicle() || Get_Current_Drawn_Weapon(p) || Get_Current_Weapon(p)) && (currentPackage == "MCP_Assassin")),
-			 characterSwitchingInvalid0 = (Gun_Up_State(p) || Crouch_State(p) || Current_Locomotion_Ring_Type(p) || Get_Weapon_State(p) || Dead_Body_Tracker(p)),
-			 characterSwitchingInvalid = (characterSwitchingInvalid0 || assassinKillingExBoyFriend || reputationLevelInsufficient);
+			 characterSwitchingTriggerInvalid[4] = {false, false, false, false},
+			 phoneCallsBlockedInvalid = (DPCBS_Struct.blockedFlag && !currentMission);
 			 
-		if (characterSwitchingInvalid)
+		characterSwitchingTriggerInvalid[0] = (Get_Weapon_State(p) || Crouch_State(p) || Gun_Up_State(p) || Get_Current_Drawn_Weapon(p) || NPC_IsInCar(p));
+		characterSwitchingTriggerInvalid[1] = (characterSwitchingTriggerInvalid[0] || Current_Locomotion_Ring_Type(p) || NPC_IsInBoat(p) || IsInVehicle());
+		characterSwitchingTriggerInvalid[2] = (characterSwitchingTriggerInvalid[1] || (GlobalSoundGetCurrentMs() != -1) || (Current_Voice_MS(p) != -1));
+		characterSwitchingTriggerInvalid[3] = (characterSwitchingTriggerInvalid[2] || (Get_Animation_Request_ID(p) > 0) || VehicleIdleStatesTriggerValid);
+		
+		if (currentMission)
+		{
+			DPCBS_Struct.blockedFlag = true;
+			DPCBS_Struct.blockedTimer = GetTickCount();
+		}
+			 
+		if (characterSwitchingTriggerInvalid[3])
 			MCS_Struct.lastPackage = currentPackage;
 		
-		if (DPCBS_Struct.blockedFlag)
+		if (phoneCallsBlockedInvalid)
 			Reset_Action_Map();
 		
 		if (Dodges_Trigger_Valid) 

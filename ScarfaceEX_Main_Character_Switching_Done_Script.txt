@@ -1,3 +1,5 @@
+"MainCharacter".isInvincible = 0;
+
 ScheduleAlways("1", "SoundFadeoutMix", "duck_cinematics"); 
 ScheduleAlways("2", "SetBlockingActionMap", "0"); 
 ScheduleAlways("3", "HUD_SetGlobalSafeToActivate", "1");
