@@ -1,3 +1,4 @@
+Schedule("1", "GlobalSoundRequestMusic", "S09Music", "success", "nonlooping", "immediate", "10", "0");
 Schedule("777", "GlobalSoundPlay", "se62", "se62");
 
 return;

@@ -1,3 +1,4 @@
+Schedule("1", "GlobalSoundRequestMusic", "AncillaryMusic", "mission_accept", "nonlooping", "immediate", "10", "0");
 Schedule("777", "PCM_PlayPhoneCall", "tony", "call_cleaner_00"); 
 
 return;

@@ -1,3 +1,4 @@
+Schedule("1", "GlobalSoundRequestMusic", "FrontMusic", "trav_car_04_fin", "nonlooping", "immediate", "10", "0");
 Schedule("777", "GlobalSoundPlay", "se_narrator", "mojo");
 
 return;

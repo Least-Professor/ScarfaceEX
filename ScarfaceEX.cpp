@@ -36,13 +36,18 @@ typedef int (__thiscall *PlayAnimationFunc)(CharacterObject*, unsigned int*, int
 
 struct Dodges_Phone_Calls_Blocker_Struct
 {
-	unsigned long blockedTimer;
-	bool blockedFlag;
+	unsigned long blockedTimer,
+				  phoneCallStartedTimer;
+
+	bool blockedFlag,
+		 phoneCallStartedFlag;
 	
 	void Reset()
 	{
 		blockedTimer = GetTickCount();
+		phoneCallStartedTimer = GetTickCount();
 		blockedFlag = false;
+		phoneCallStartedFlag = false;
 	}
 }
 DPCBS_Struct;
@@ -2423,22 +2428,21 @@ void Dodge(CharacterObject* player, const std::string& animName)
 	phoneCallsTriggerValid[2] = (phoneCallsTriggerValid[1] && !MGM_Visibility_Is_Red() && !MGM_Get_Visibility_Points_Wrapper() && !MGM_Visibility_Is_Fucked());
 	phoneCallsTriggerValid[3] = (phoneCallsTriggerValid[2] && (DB_Get_Reputation_Level_Wrapper() >= 2) && (currentPackage != "MCP_Assassin"));
 	phoneCallsTriggerValid[4] = (phoneCallsTriggerValid[3] && (currentPackage != "MCP_Driver") && (currentPackage != "MCP_Enforcer") && !Gun_Up_State(player));
-	phoneCallsTriggerValid[5] = (phoneCallsTriggerValid[4] && !Get_Current_Drawn_Weapon(player) && !Crouch_State(player));
+	phoneCallsTriggerValid[5] = (phoneCallsTriggerValid[4] && !Get_Current_Drawn_Weapon(player) && !Crouch_State(player) && !DPCBS_Struct.phoneCallStartedFlag);
 	
-	CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid[4]);
-	GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid[4]);
+	CopBribe = ((animName == "Cop_Bribe") && phoneCallsTriggerValid[5]);
+	GangBribe = ((animName == "Gang_Bribe") && phoneCallsTriggerValid[5]);
 	
 	dodgesTriggerValid = ((animName != "Cop_Bribe") && (animName != "Gang_Bribe"));
 	
 	if (ActionMap)
-	{
-		DPCBS_Struct.blockedTimer = GetTickCount();
-		DPCBS_Struct.blockedFlag = true;
-	}
+		return;
 	
 	if (CopBribe)
 	{
 		RunScript(Cop_Bribe_Script.c_str());
+		DPCBS_Struct.phoneCallStartedFlag = true;
+		DPCBS_Struct.phoneCallStartedTimer = GetTickCount();	
 		DPCBS_Struct.blockedTimer = GetTickCount();
 		DPCBS_Struct.blockedFlag = true;
 	}
@@ -2446,6 +2450,8 @@ void Dodge(CharacterObject* player, const std::string& animName)
 	if (GangBribe)
 	{
 		RunScript(Gang_Bribe_Script.c_str());
+		DPCBS_Struct.phoneCallStartedFlag = true;
+		DPCBS_Struct.phoneCallStartedTimer = GetTickCount();	
 		DPCBS_Struct.blockedTimer = GetTickCount();
 		DPCBS_Struct.blockedFlag = true;
 	}
@@ -3331,12 +3337,6 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 			 currentDeathStatus = Main_Character_Death_Status();
 		
 		scarfaceEXTriggerValid = (!currentNIS && !currentGamePaused && !currentScreenFXTransition && !currentTeleportation && !currentDeathStatus && !Main_Menu);
-	
-		if (currentNIS)
-		{
-			DPCBS_Struct.blockedTimer = GetTickCount();
-			DPCBS_Struct.blockedFlag = true;
-		}
 	}
 	
 	__except(EXCEPTION_EXECUTE_HANDLER)
@@ -3344,10 +3344,11 @@ bool ScarfaceEX_Trigger_Valid(CharacterObject* p)
 		scarfaceEXTriggerValid = false;
 	}
 	
-	bool blockedTimerReset = (!scarfaceEXTriggerValid && DPCBS_Struct.blockedFlag);
-	
-	if (blockedTimerReset)
+	if (!scarfaceEXTriggerValid)
+	{
 		DPCBS_Struct.blockedTimer = GetTickCount();
+		DPCBS_Struct.blockedFlag = true;
+	}
 	
 	return scarfaceEXTriggerValid;
 }
@@ -3396,7 +3397,7 @@ void Main_Character_Switching_Function()
     if (Main_Character_Switched)
 	{
 		if (Valid_Package)
-			RunScript(Main_Character_Switching_To_Valid_Package_Script.c_str());
+			RunScript(Main_Character_Switching_To_Valid_Package_Script.c_str());	
 		
 		else
 		{
@@ -3460,6 +3461,18 @@ void Main_Character_Switching_Function()
 	}
 	
     MCS_Struct.lastPackage = currentPackage;
+}
+
+void Next_Bribery_Phone_Call_Valid()
+{
+	bool nextBriberyPhoneCallValid = (((GetTickCount() - DPCBS_Struct.phoneCallStartedTimer) > 753210UL) && DPCBS_Struct.phoneCallStartedFlag),
+		 globalSoundActive = ((GlobalSoundGetCurrentMs() != -1) && DPCBS_Struct.phoneCallStartedFlag);
+		 
+	if (globalSoundActive)
+		DPCBS_Struct.phoneCallStartedTimer = GetTickCount();
+	
+	if (nextBriberyPhoneCallValid)
+		DPCBS_Struct.phoneCallStartedFlag = false;
 }
 
 void Reset_Action_Map()
@@ -3530,6 +3543,15 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 		 weaponYetToBePickedUp = CTMNVS_Struct.weaponYetToPickUp && !CTMNVS_Struct.weaponPickedUp;
 	
 	unsigned long currentTimer = GetTickCount();
+		 
+	if (globalSoundActive)
+	{
+		CTMNVS_Struct.lastTimer = currentTimer;
+		CTMNVS_Struct.nextQuote = Random_Quotes();
+		CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+
+		return;
+	}	
 	
 	if (weaponYetToPickUp)
 	{
@@ -3555,7 +3577,7 @@ void Combat_Tutorial_Missing_Narrator_Voices_Tracker_Function(CharacterObject* p
 	CTMNVS_Struct.lastDrawnWeapon = currentDrawnWeapon;
 	bool triggerValid = (!CTMNVS_Struct.missionComplete && CTMNVS_Struct.missionStarted && !currentRageMode && !globalSoundActive),
 		 timerValid = (CTMNVS_Struct.introductionDone || aimingWeapon),
-		 introductionTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > 5731UL),
+		 introductionTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > 2357UL),
 		 playTimeTimer = ((currentTimer - CTMNVS_Struct.lastTimer) > CTMNVS_Struct.quoteDelay),
 		 triggerNarratorsQuotes = timerValid ? (triggerValid && playTimeTimer) : (triggerValid && introductionTimer),
 		 missionComplete = (!currentRageMode && CTMNVS_Struct.lastRageMode && !CTMNVS_Struct.missionComplete), 
@@ -3803,13 +3825,13 @@ void Narrator_Death_Quotes_Function(CharacterObject* player)
 		NDQS_Struct.narratorDeathQuotesTriggerValid = false;
 }
 
-void Reset_Mission_Constraints_Function()
+void Reset_Mission_Constraints_Function(CharacterObject* player)
 {
 	bool Mission_Inactive = false;
 	
 	__try
 	{
-		Mission_Inactive = !Get_Mission_Active();
+		Mission_Inactive = (!Get_Mission_Active() || Main_Character_Death_Status() || Dead_Body_Tracker(player));
 		
 		if (Mission_Inactive)
 		{
@@ -3942,14 +3964,18 @@ DWORD WINAPI InputThread(LPVOID lpParam)
             continue;
 		
         unsigned long now = GetTickCount();
-		Reset_Mission_Constraints_Function();
+		Reset_Mission_Constraints_Function(p);
 		Narrator_Death_Quotes_Function(p);
 		bool Scarface_EX_Trigger_Valid = ScarfaceEX_Trigger_Valid(p);
 		
 		if (!Scarface_EX_Trigger_Valid)
 		{
-			if (!CTMNVS_Struct.introductionDone)
+			if (CTMNVS_Struct.missionStarted)
+			{
 				CTMNVS_Struct.lastTimer = now;
+				CTMNVS_Struct.nextQuote = Random_Quotes();
+				CTMNVS_Struct.quoteDelay = Random_Quote_Delays();
+			}
 			
 			if (MCS_Struct.narratorQuotesTriggered)
 				MCS_Struct.lastTimer = now;
@@ -3959,6 +3985,9 @@ DWORD WINAPI InputThread(LPVOID lpParam)
 			
 			continue;
 		}
+		
+		if (DPCBS_Struct.phoneCallStartedFlag)
+			Next_Bribery_Phone_Call_Valid();
 		
 		// Global Trackers
 		int npcCount = 0, 

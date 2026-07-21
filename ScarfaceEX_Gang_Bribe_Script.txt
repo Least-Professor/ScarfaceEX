@@ -1,6 +1,7 @@
-$currentRate = -1000 * DBGetReputationLevel();
+$deductionRate = (stxogkpfppp() >= stxlahgjnip()) ? -stxlahgjnip() : -stxogkpfppp();
+$bonusRate = (stxogkpfppp() >= stxlahgjnip()) ? stxlahgjnip() : stxogkpfppp();
 
-$startingTriggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+$startingTriggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 $startingTriggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 $startingTriggerValid = ($startingTriggerValid0 && $startingTriggerValid1);
 
@@ -19,22 +20,41 @@ function Reset_Locomotion_Type()
 	"MainCharacter".isInvincible = 0;
 	"MainCharacter".Schedule("1", "stxopmddkok");
 	
-	ScheduleAlways("2", "DBChangeCleanCash", "-1000"); 
-	ScheduleAlways("3", "DBChangeGangHeat", $currentRate);
-	ScheduleAlways("4", "HUD_SetGlobalSafeToActivate", "1");
+	ScheduleAlways("2", "DBChangeCleanCash", $deductionRate); 
+	ScheduleAlways("3", "DBChangeGangHeat", $deductionRate);
+	ScheduleAlways("4", "DBChangeBalls", $bonusRate);
+	ScheduleAlways("5", "HUD_SetGlobalSafeToActivate", "1");
+	
+	return;
+}
+
+function hangupphone_00()
+{
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
+	$triggerValid = ($triggerValid0 && $triggerValid1);
+	
+	if ($triggerValid)
+	{
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "hangupphone_00", "Reset_Locomotion_Type");
+		
+		return;
+	}
+	
+	Reset_Locomotion_Type_Name();
 	
 	return;
 }
 
 function miami_cop_02_donutbribedone_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribedone_00", "Reset_Locomotion_Type");
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_02", "donutbribedone_00", "hangupphone_00");
 		
 		return;
 	}
@@ -46,7 +66,7 @@ function miami_cop_02_donutbribedone_00()
 
 function gang_heat_pay_down_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -64,7 +84,7 @@ function gang_heat_pay_down_00()
 
 function miami_cop_01_donutbribedone_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -82,7 +102,7 @@ function miami_cop_01_donutbribedone_00()
 
 function accept_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -98,15 +118,15 @@ function accept_00()
 	return;
 }
 
-function se_tony_henchman_05_backupcall_00()
+function white_vice_cop_bribe_00_2()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "se_tony_henchman_05", "backupcall_00", "accept_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "accept_00");
 		
 		return;
 	}
@@ -118,13 +138,13 @@ function se_tony_henchman_05_backupcall_00()
 
 function convince_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "convince_00", "se_tony_henchman_05_backupcall_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "convince_00", "white_vice_cop_bribe_00_2");
 		
 		return;
 	}
@@ -134,15 +154,15 @@ function convince_00()
 	return;
 }
 
-function se_tony_henchman_04_backupcall_00()
+function white_vice_cop_bribe_00_1()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "se_tony_henchman_04", "backupcall_00", "convince_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "convince_00");
 		
 		return;
 	}
@@ -154,13 +174,13 @@ function se_tony_henchman_04_backupcall_00()
 
 function decline_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "decline_00", "se_tony_henchman_04_backupcall_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "decline_00", "white_vice_cop_bribe_00_1");
 		
 		return;
 	}
@@ -170,15 +190,15 @@ function decline_00()
 	return;
 }
 
-function se_tony_henchman_03_backupcall_00()
+function white_vice_cop_bribe_00_0()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "se_tony_henchman_03", "backupcall_00", "decline_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "decline_00");
 		
 		return;
 	}
@@ -190,13 +210,13 @@ function se_tony_henchman_03_backupcall_00()
 
 function buy_off_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_00", "se_tony_henchman_03_backupcall_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_00", "white_vice_cop_bribe_00_0");
 		
 		return;
 	}
@@ -206,15 +226,15 @@ function buy_off_00()
 	return;
 }
 
-function se_tony_henchman_02_backupcall_00()
+function white_vice_cop_bribe_00_()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "se_tony_henchman_02", "backupcall_00", "buy_off_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "buy_off_00");
 		
 		return;
 	}
@@ -226,13 +246,13 @@ function se_tony_henchman_02_backupcall_00()
 
 function buy_off_approach_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_approach_00", "se_tony_henchman_02_backupcall_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "buy_off_approach_00", "white_vice_cop_bribe_00_");
 		
 		return;
 	}
@@ -242,15 +262,15 @@ function buy_off_approach_00()
 	return;
 }
 
-function se_tony_henchman_01_backupcall_00()
+function white_vice_cop_bribe_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "se_tony_henchman_01", "backupcall_00", "buy_off_approach_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "buy_off_approach_00");
 		
 		return;
 	}
@@ -262,13 +282,13 @@ function se_tony_henchman_01_backupcall_00()
 
 function greet_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "greet_00", "se_tony_henchman_01_backupcall_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "greet_00", "white_vice_cop_bribe_00");
 		
 		return;
 	}
@@ -280,7 +300,7 @@ function greet_00()
 
 function miami_cop_02_donutbribe_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -296,15 +316,15 @@ function miami_cop_02_donutbribe_00()
 	return;
 }
 
-function answerphone_00()
+function genmale_friend_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "answerphone_00", "miami_cop_02_donutbribe_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "genmale_friend_00", "miami_cop_02_donutbribe_00");
 		
 		return;
 	}
@@ -316,13 +336,13 @@ function answerphone_00()
 
 function miami_cop_01_donutbribe_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "answerphone_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "miami_cop_01", "donutbribe_00", "genmale_friend_00");
 		
 		return;
 	}
@@ -332,15 +352,15 @@ function miami_cop_01_donutbribe_00()
 	return;
 }
 
-function hangupphone_00()
+function answerphone_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "tony", "hangupphone_00", "miami_cop_01_donutbribe_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "tony", "answerphone_00", "miami_cop_01_donutbribe_00");
 		
 		return;
 	}
@@ -350,15 +370,15 @@ function hangupphone_00()
 	return;
 }
 
-function random_00()
+function white_vice_cop_bribe_00_3()
 {
-	$triggerValid0 = ((stxogkpfppp() > 1000) && (stxlahgjnip() > 1000.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
 	if ($triggerValid)
 	{
-		ScheduleAlways("1", "GlobalSoundPlay", "radio_cop", "random_00", "hangupphone_00");
+		ScheduleAlways("1", "GlobalSoundPlay", "white_vice_cop", "cop_bribe_00", "answerphone_00");
 		
 		return;
 	}
@@ -373,7 +393,7 @@ if ($startingTriggerValid)
 	"MainCharacter".isInvincible = 1;
 	
 	ScheduleAlways("1", "HUD_SetGlobalSafeToActivate", "0");
-	ScheduleAlways("2", "GlobalSoundPlay", "tony", "snorting_00", "random_00");
+	ScheduleAlways("2", "GlobalSoundPlay", "tony", "snorting_00", "white_vice_cop_bribe_00_3");
 	
 	"MainCharacter".Schedule("3", "stxphahdkkj", "0");
 	
