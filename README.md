@@ -41,6 +41,7 @@ This mod introduces high-quality gameplay improvements while maintaining a "vani
 
 ```
 23 - 15.12.2025
+- Restored unused soundtrack.
 - Added phone calls for bribing cops.
 - Added vehicular taunts.
 - Restored Tony's unused phone call with Mama \ Jerry's cutscene ending dialogue \ unused phone call with Sosa.
