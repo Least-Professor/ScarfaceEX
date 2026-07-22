@@ -102,7 +102,7 @@ function miami_cop_01_donutbribedone_00()
 
 function accept_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -282,7 +282,7 @@ function white_vice_cop_bribe_00()
 
 function greet_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -300,7 +300,7 @@ function greet_00()
 
 function miami_cop_02_donutbribe_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -318,7 +318,7 @@ function miami_cop_02_donutbribe_00()
 
 function genmale_friend_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -336,7 +336,7 @@ function genmale_friend_00()
 
 function miami_cop_01_donutbribe_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -354,7 +354,7 @@ function miami_cop_01_donutbribe_00()
 
 function answerphone_00()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
@@ -372,7 +372,7 @@ function answerphone_00()
 
 function white_vice_cop_bribe_00_3()
 {
-	$triggerValid0 = ((stxogkpfppp() > 0) && (stxlahgjnip() > 0.0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
+	$triggerValid0 = ((stxogkpfppp() > 0) && (stxadlbimkj() > 0) && !HUD_IsGamePaused() && !IsMainCharacterKilledOrFlaggedForOnKilled());
 	$triggerValid1 = (!IsTeleporting() && !NISIsPlaying() && $gPauseCharacters == 0 && $gPauseVehicles == 0 && !MGM_GetMissionActive());
 	$triggerValid = ($triggerValid0 && $triggerValid1);
 	
